@@ -19,6 +19,8 @@
   --surface: rgba(255, 255, 255, 0.8);
   --surface-strong: rgba(255, 255, 255, 0.95);
   --line: rgba(23, 58, 64, 0.12);
+  --chip-line: rgba(23, 58, 64, 0.14);
+  --chip-bg: rgba(255, 255, 255, 0.5);
   --bg-base: #f4f9f6;
   --header-bg: rgba(255, 255, 255, 0.86);
 }
@@ -35,6 +37,8 @@
   --surface: rgba(16, 30, 34, 0.8);
   --surface-strong: rgba(15, 27, 31, 0.92);
   --line: rgba(141, 229, 219, 0.18);
+  --chip-line: rgba(141, 229, 219, 0.16);
+  --chip-bg: rgba(16, 30, 34, 0.5);
   --bg-base: #0a1418;
   --header-bg: rgba(10, 20, 24, 0.86);
 }
@@ -51,6 +55,8 @@
     --surface: rgba(16, 30, 34, 0.8);
     --surface-strong: rgba(15, 27, 31, 0.92);
     --line: rgba(141, 229, 219, 0.18);
+    --chip-line: rgba(141, 229, 219, 0.16);
+    --chip-bg: rgba(16, 30, 34, 0.5);
     --bg-base: #0a1418;
     --header-bg: rgba(10, 20, 24, 0.86);
   }
