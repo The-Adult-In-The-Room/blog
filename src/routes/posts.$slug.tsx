@@ -25,6 +25,9 @@ function PostPage() {
 
 			<header className="mb-10 max-w-3xl">
 				<div className="flex flex-wrap items-center gap-3 text-sm text-[var(--sea-ink-soft)]">
+					{post.number ? (
+						<span className="font-medium">#{post.number}</span>
+					) : null}
 					{post.date ? (
 						<time dateTime={post.date} className="font-medium">
 							{post.date}

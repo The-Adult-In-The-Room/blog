@@ -11,11 +11,12 @@ export type Post = {
 	excerpt: string;
 	content: string;
 	tags: string[];
+	number: number | null;
 };
 
 export type PostSummary = Pick<
 	Post,
-	"slug" | "title" | "date" | "excerpt" | "tags"
+	"slug" | "title" | "date" | "excerpt" | "tags" | "number"
 >;
 
 const CONTENT_DIR = path.resolve("content");
@@ -36,6 +37,12 @@ function filenameToTitle(filename: string): string {
 			word ? word[0].toUpperCase() + word.slice(1).toLowerCase() : "",
 		);
 	return words.join(" ");
+}
+
+function filenameToNumber(filename: string): number | null {
+	const base = path.basename(filename, path.extname(filename));
+	const match = base.match(/^(\d+)_/);
+	return match ? Number.parseInt(match[1], 10) : null;
 }
 
 function extractExcerpt(body: string): string {
@@ -79,8 +86,9 @@ async function readPostFile(filePath: string): Promise<Post> {
 	const excerpt = data.excerpt ?? extractExcerpt(body);
 	const content = await marked(body);
 	const tags = normalizeTags(data.tags);
+	const number = data.number ?? filenameToNumber(filePath);
 
-	return { slug, title, date, excerpt, content, tags };
+	return { slug, title, date, excerpt, content, tags, number };
 }
 
 export const getPosts = createServerFn({ method: "GET" }).handler(
@@ -93,14 +101,16 @@ export const getPosts = createServerFn({ method: "GET" }).handler(
 		);
 
 		return posts
-			.map(({ slug, title, date, excerpt, tags }) => ({
+			.map(({ slug, title, date, excerpt, tags, number }) => ({
 				slug,
 				title,
 				date,
 				excerpt,
 				tags,
+				number,
 			}))
 			.sort((a, b) => {
+				if (a.number && b.number) return a.number - b.number;
 				if (a.date && b.date) return b.date.localeCompare(a.date);
 				if (a.date) return -1;
 				if (b.date) return 1;

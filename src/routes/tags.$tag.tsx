@@ -46,6 +46,7 @@ function TagPage() {
 								className="group block rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 no-underline transition hover:-translate-y-0.5 hover:border-[var(--lagoon-deep)]/30 hover:bg-[var(--surface-strong)] sm:p-6"
 							>
 								<div className="flex flex-wrap items-center gap-2 text-xs text-[var(--sea-ink-soft)]">
+									{post.number ? <span>#{post.number}</span> : null}
 									{post.date ? (
 										<time dateTime={post.date}>{post.date}</time>
 									) : null}
