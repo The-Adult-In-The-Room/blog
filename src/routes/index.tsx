@@ -2,8 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import TagList from "../components/TagList";
 import { getPosts } from "../lib/posts";
 
+export async function homeLoader() {
+	return getPosts();
+}
+
 export const Route = createFileRoute("/")({
-	loader: async () => getPosts(),
+	loader: homeLoader,
 	component: Home,
 });
 

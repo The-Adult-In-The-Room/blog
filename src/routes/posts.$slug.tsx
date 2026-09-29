@@ -2,12 +2,14 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import TagList from "../components/TagList";
 import { getPost } from "../lib/posts";
 
+export async function postLoader({ params }: { params: { slug: string } }) {
+	const post = await getPost({ data: params.slug });
+	if (!post) throw notFound();
+	return post;
+}
+
 export const Route = createFileRoute("/posts/$slug")({
-	loader: async ({ params }) => {
-		const post = await getPost({ data: params.slug });
-		if (!post) throw notFound();
-		return post;
-	},
+	loader: postLoader,
 	component: PostPage,
 });
 
