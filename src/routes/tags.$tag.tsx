@@ -2,12 +2,14 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import TagList from "../components/TagList";
 import { getPosts } from "../lib/posts";
 
+export async function tagLoader({ params }: { params: { tag: string } }) {
+	const posts = await getPosts();
+	const tag = params.tag.toLowerCase().trim();
+	return { tag, posts: posts.filter((post) => post.tags.includes(tag)) };
+}
+
 export const Route = createFileRoute("/tags/$tag")({
-	loader: async ({ params }) => {
-		const posts = await getPosts();
-		const tag = params.tag.toLowerCase().trim();
-		return { tag, posts: posts.filter((post) => post.tags.includes(tag)) };
-	},
+	loader: tagLoader,
 	component: TagPage,
 });
 

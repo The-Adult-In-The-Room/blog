@@ -57,3 +57,7 @@ npm run preview
 - `npm run preview` – preview the production build
 - `npm run generate-routes` – regenerate the TanStack Router route tree
 - `npm run lint` / `npm run format` – run Biome
+- `npm run test` – run the test suite with coverage
+- `npm run test:ci` – run tests with coverage enforcement (used in CI)
+- `npm run test:watch` – run tests in watch mode
+- `npm run verify` – run type checking, linting, formatting, and tests

@@ -2,6 +2,9 @@
   "name": "blog",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
   "imports": {
     "#/*": "./src/*"
   },
@@ -13,8 +16,12 @@
     "format": "biome format",
     "lint": "biome lint",
     "check": "biome check",
-    "test": "vitest run",
+    "fix": "biome check --write",
+    "ts:check": "tsc",
+    "test": "vitest --coverage",
+    "test:ci": "vitest run --coverage",
     "test:watch": "vitest",
+    "verify": "tsc && biome ci && npm run test:ci",
     "start": "node .output/server/index.mjs"
   },
   "dependencies": {
@@ -42,6 +49,7 @@
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^6.0.1",
+    "@vitest/coverage-v8": "^5.0.2",
     "babel-plugin-react-compiler": "^1.0.0",
     "typescript": "^6.0.2",
     "vite": "^8.0.0",

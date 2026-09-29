@@ -19,15 +19,15 @@ export type PostSummary = Pick<
 	"slug" | "title" | "date" | "excerpt" | "tags" | "number"
 >;
 
-const CONTENT_DIR = path.resolve("content");
+export const CONTENT_DIR = path.resolve("content");
 
-function filenameToSlug(filename: string): string {
+export function filenameToSlug(filename: string): string {
 	const base = path.basename(filename, path.extname(filename));
 	// Strip optional numeric prefix like "1_"
 	return base.replace(/^\d+_/, "").replace(/_/g, "-").toLowerCase();
 }
 
-function filenameToTitle(filename: string): string {
+export function filenameToTitle(filename: string): string {
 	const base = path.basename(filename, path.extname(filename));
 	const words = base
 		.replace(/^\d+_/, "")
@@ -39,13 +39,13 @@ function filenameToTitle(filename: string): string {
 	return words.join(" ");
 }
 
-function filenameToNumber(filename: string): number | null {
+export function filenameToNumber(filename: string): number | null {
 	const base = path.basename(filename, path.extname(filename));
 	const match = base.match(/^(\d+)_/);
 	return match ? Number.parseInt(match[1], 10) : null;
 }
 
-function extractExcerpt(body: string): string {
+export function extractExcerpt(body: string): string {
 	const paragraphs = body
 		.replace(/^#{1,6}\s+.+$/gm, "")
 		.split(/\n\s*\n/)
@@ -58,7 +58,7 @@ function extractExcerpt(body: string): string {
 	return first.length > 160 ? `${first.slice(0, 157)}...` : first;
 }
 
-function normalizeTags(input: unknown): string[] {
+export function normalizeTags(input: unknown): string[] {
 	if (Array.isArray(input)) {
 		return input
 			.map((tag) => String(tag).toLowerCase().trim())
@@ -75,7 +75,7 @@ function normalizeTags(input: unknown): string[] {
 	return [];
 }
 
-async function readPostFile(filePath: string): Promise<Post> {
+export async function readPostFile(filePath: string): Promise<Post> {
 	const raw = await fs.promises.readFile(filePath, "utf-8");
 	const { data, content: body } = matter(raw);
 	const slug = data.slug ?? filenameToSlug(filePath);
@@ -91,43 +91,61 @@ async function readPostFile(filePath: string): Promise<Post> {
 	return { slug, title, date, excerpt, content, tags, number };
 }
 
-export const getPosts = createServerFn({ method: "GET" }).handler(
-	async (): Promise<PostSummary[]> => {
-		const files = await fs.promises.readdir(CONTENT_DIR);
-		const posts = await Promise.all(
-			files
-				.filter((file) => file.endsWith(".md"))
-				.map((file) => readPostFile(path.join(CONTENT_DIR, file))),
-		);
+export function sortPosts(posts: PostSummary[]): PostSummary[] {
+	return [...posts].sort((a, b) => {
+		if (a.number && b.number) return a.number - b.number;
+		if (a.date && b.date) return b.date.localeCompare(a.date);
+		if (a.date) return -1;
+		if (b.date) return 1;
+		return a.title.localeCompare(b.title);
+	});
+}
 
-		return posts
-			.map(({ slug, title, date, excerpt, tags, number }) => ({
-				slug,
-				title,
-				date,
-				excerpt,
-				tags,
-				number,
-			}))
-			.sort((a, b) => {
-				if (a.number && b.number) return a.number - b.number;
-				if (a.date && b.date) return b.date.localeCompare(a.date);
-				if (a.date) return -1;
-				if (b.date) return 1;
-				return a.title.localeCompare(b.title);
-			});
-	},
+export async function getPostsFromDir(
+	contentDir: string,
+): Promise<PostSummary[]> {
+	const files = await fs.promises.readdir(contentDir);
+	const posts = await Promise.all(
+		files
+			.filter((file) => file.endsWith(".md"))
+			.map((file) => readPostFile(path.join(contentDir, file))),
+	);
+
+	return sortPosts(
+		posts.map(({ slug, title, date, excerpt, tags, number }) => ({
+			slug,
+			title,
+			date,
+			excerpt,
+			tags,
+			number,
+		})),
+	);
+}
+
+export async function getPostFromDir(
+	contentDir: string,
+	slug: string,
+): Promise<Post | null> {
+	const files = await fs.promises.readdir(contentDir);
+	const file = files.find(
+		(f) => f.endsWith(".md") && filenameToSlug(f) === slug,
+	);
+
+	if (!file) return null;
+
+	return readPostFile(path.join(contentDir, file));
+}
+
+/* c8 ignore start */
+export const getPosts = createServerFn({ method: "GET" }).handler(
+	async (): Promise<PostSummary[]> => getPostsFromDir(CONTENT_DIR),
 );
 
 export const getPost = createServerFn({ method: "GET" })
 	.validator((slug: string) => slug)
-	.handler(async ({ data: slug }): Promise<Post | null> => {
-		const files = await fs.promises.readdir(CONTENT_DIR);
-		const file = files.find(
-			(f) => f.endsWith(".md") && filenameToSlug(f) === slug,
-		);
-
-		if (!file) return null;
-
-		return readPostFile(path.join(CONTENT_DIR, file));
-	});
+	.handler(
+		async ({ data: slug }): Promise<Post | null> =>
+			getPostFromDir(CONTENT_DIR, slug),
+	);
+/* c8 ignore stop */
