@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { createServerFn } from "@tanstack/react-start";
 import matter from "gray-matter";
-import { marked } from "marked";
+import { renderMarkdown } from "./markdown";
 
 export type Post = {
 	slug: string;
@@ -84,7 +84,7 @@ async function readPostFile(filePath: string): Promise<Post> {
 		? new Date(data.date).toISOString().slice(0, 10)
 		: null;
 	const excerpt = data.excerpt ?? extractExcerpt(body);
-	const content = await marked(body);
+	const content = await renderMarkdown(body);
 	const tags = normalizeTags(data.tags);
 	const number = data.number ?? filenameToNumber(filePath);
 

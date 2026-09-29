@@ -4,7 +4,7 @@ export default function TagList({ tags }: { tags: string[] }) {
 	if (tags.length === 0) return null;
 
 	return (
-		<div className="flex flex-wrap gap-1.5">
+		<div className="flex min-w-0 flex-wrap items-center gap-1.5">
 			{tags.map((tag) => (
 				<Link
 					key={tag}

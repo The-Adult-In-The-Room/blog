@@ -30,27 +30,29 @@ function Home() {
 					<ul className="m-0 space-y-4 p-0">
 						{posts.map((post) => (
 							<li key={post.slug} className="list-none">
-								<Link
-									to="/posts/$slug"
-									params={{ slug: post.slug }}
-									className="group block rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 no-underline transition hover:-translate-y-0.5 hover:border-[var(--lagoon-deep)]/30 hover:bg-[var(--surface-strong)] sm:p-6"
-								>
-									<div className="flex flex-wrap items-center gap-2 text-xs text-[var(--sea-ink-soft)]">
-										{post.number ? <span>#{post.number}</span> : null}
+								<article className="group block rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 transition hover:-translate-y-0.5 hover:border-[var(--lagoon-deep)]/30 hover:bg-[var(--surface-strong)] sm:p-6">
+									<div className="flex min-w-0 flex-wrap items-center gap-2 text-xs text-[var(--sea-ink-soft)]">
+										{Boolean(post.number) && <p>#{post.number}</p>}
 										{post.date ? (
 											<time dateTime={post.date}>{post.date}</time>
 										) : null}
 										<TagList tags={post.tags} />
 									</div>
 									<h3 className="mt-1 text-xl font-semibold text-[var(--sea-ink)] group-hover:text-[var(--lagoon-deep)]">
-										{post.title}
+										<Link
+											to="/posts/$slug"
+											params={{ slug: post.slug }}
+											className="no-underline"
+										>
+											{post.title}
+										</Link>
 									</h3>
-									{post.excerpt ? (
+									{Boolean(post.excerpt) && (
 										<p className="mt-2 line-clamp-2 text-sm leading-relaxed text-[var(--sea-ink-soft)]">
 											{post.excerpt}
 										</p>
-									) : null}
-								</Link>
+									)}
+								</article>
 							</li>
 						))}
 					</ul>

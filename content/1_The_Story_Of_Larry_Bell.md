@@ -11,8 +11,7 @@ I attended Kalamazoo Valley Community College (KVCC) back in spring 2026 for the
 
 She told me a story about when she worked at a dive bar on the side of town. One night there was this older gentleman who came in and sat at the bar. He clearly had already been drinking, but he ordered an Oberon on draft.
 
-
-She poured his beer, and garnished the glass with an orange slice. Oberon is a citrusy American wheat ale, the type of beer which screams for an orange slice.
+Oberon is a citrusy American wheat ale, the type of beer which screams for an orange slice. She poured his beer, then garnished the glass with an orange. 
 
 She slid the beer across the bar, which prompted the man to scrunch up his face. He grabbed the orange slice from the glass, and threw it at her. Then he shouted "Put some respect on this beer, it was never intended to be served with an orange". Shook up, she walked to the kitchen and told a waitress what just happened. The waitress looked out into the bar room, then said "Oh that's Larry Bell, he created Oberon."
 
