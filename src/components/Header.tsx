@@ -7,21 +7,12 @@ export default function Header() {
 			<nav className="page-wrap flex items-center justify-between py-4">
 				<Link
 					to="/"
-					className="text-base font-semibold tracking-tight text-[var(--sea-ink)] no-underline"
+					className="text-base font-semibold tracking-tight text-[var(--sea-ink)] no-underline transition hover:text-[var(--lagoon-deep)]"
 				>
 					Raymond Cox
 				</Link>
 
-				<div className="flex items-center gap-4">
-					<Link
-						to="/"
-						className="nav-link text-sm font-medium"
-						activeProps={{ className: "nav-link is-active" }}
-					>
-						Home
-					</Link>
-					<ThemeToggle />
-				</div>
+				<ThemeToggle />
 			</nav>
 		</header>
 	);

@@ -2,6 +2,9 @@
 title: The story of Larry Bell
 date: 2026-09-28
 excerpt: A bartender in Kalamazoo gets an orange thrown at her by the creator of Oberon.
+tags:
+  - beer
+  - life
 ---
 
 I attended Kalamazoo Valley Community College (KVCC) back in spring 2026 for the brewing program. I was in a class with two gals. One gal was a bartender in Kalamazoo at various establishments past decade. 
@@ -13,7 +16,7 @@ She poured his beer, and garnished the glass with an orange slice. Oberon is a c
 
 She slid the beer across the bar, which prompted the man to scrunch up his face. He grabbed the orange slice from the glass, and threw it at her. Then he shouted "Put some respect on this beer, it was never intended to be served with an orange". Shook up, she walked to the kitchen and told a waitress what just happened. The waitress looked out into the bar room, then said "Oh that's Larry Bell, he created Oberon."
 
-After hearing that story I've never drank an Oberon with an orange slice again. I've even gone as far as sharing this story with various wait staff who ask me if I'd like an orange with my Oberon. I want to give Oberon and the creator the respect they both deeply deserve.
+After hearing that story I've never drank an Oberon with an orange slice again. Much to my wife's dismay, I've even gone as far as sharing this story with various wait staff who ask me if I'd like an orange with my Oberon. I want to give Oberon and the creator the respect they both deeply deserve.
 
 ## History time! 
 Disclaimer: I love learning and sharing brewing history. I've toured both Bell's Eccentric Cafe (original brewery, small seasonals now), and Bell's Comstock commercial brewery. I've also brewed a watermelon sour on-site at the Eccentric Cafe with Bell's head brewer during my brewing program.

@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import TagList from "../components/TagList";
 import { getPosts } from "../lib/posts";
 
 export const Route = createFileRoute("/")({
@@ -12,13 +13,10 @@ function Home() {
 	return (
 		<main className="page-wrap px-4 py-12 sm:py-16">
 			<section className="mb-12 max-w-2xl">
-				<h1 className="display-title mb-4 text-3xl font-bold tracking-tight text-[var(--sea-ink)] sm:text-4xl">
-					Raymond Cox
+				<h1 className="display-title mb-2 text-2xl font-medium tracking-tight text-[var(--sea-ink-soft)] sm:text-3xl">
+					Thoughts on code, brewing, and whatever nonsense is rattling around in
+					my head.
 				</h1>
-				<p className="m-0 text-lg leading-relaxed text-[var(--sea-ink-soft)]">
-					Notes on code, brewing, and whatever else is rattling around in my
-					head.
-				</p>
 			</section>
 
 			<section className="space-y-6">
@@ -41,6 +39,7 @@ function Home() {
 										{post.date ? (
 											<time dateTime={post.date}>{post.date}</time>
 										) : null}
+										<TagList tags={post.tags} />
 									</div>
 									<h3 className="mt-1 text-xl font-semibold text-[var(--sea-ink)] group-hover:text-[var(--lagoon-deep)]">
 										{post.title}

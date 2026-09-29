@@ -10,9 +10,13 @@ export type Post = {
 	date: string | null;
 	excerpt: string;
 	content: string;
+	tags: string[];
 };
 
-export type PostSummary = Pick<Post, "slug" | "title" | "date" | "excerpt">;
+export type PostSummary = Pick<
+	Post,
+	"slug" | "title" | "date" | "excerpt" | "tags"
+>;
 
 const CONTENT_DIR = path.resolve("content");
 
@@ -47,6 +51,23 @@ function extractExcerpt(body: string): string {
 	return first.length > 160 ? `${first.slice(0, 157)}...` : first;
 }
 
+function normalizeTags(input: unknown): string[] {
+	if (Array.isArray(input)) {
+		return input
+			.map((tag) => String(tag).toLowerCase().trim())
+			.filter((tag) => tag.length > 0);
+	}
+
+	if (typeof input === "string" && input.length > 0) {
+		return input
+			.split(",")
+			.map((tag) => tag.toLowerCase().trim())
+			.filter(Boolean);
+	}
+
+	return [];
+}
+
 async function readPostFile(filePath: string): Promise<Post> {
 	const raw = await fs.promises.readFile(filePath, "utf-8");
 	const { data, content: body } = matter(raw);
@@ -57,8 +78,9 @@ async function readPostFile(filePath: string): Promise<Post> {
 		: null;
 	const excerpt = data.excerpt ?? extractExcerpt(body);
 	const content = await marked(body);
+	const tags = normalizeTags(data.tags);
 
-	return { slug, title, date, excerpt, content };
+	return { slug, title, date, excerpt, content, tags };
 }
 
 export const getPosts = createServerFn({ method: "GET" }).handler(
@@ -71,7 +93,13 @@ export const getPosts = createServerFn({ method: "GET" }).handler(
 		);
 
 		return posts
-			.map(({ slug, title, date, excerpt }) => ({ slug, title, date, excerpt }))
+			.map(({ slug, title, date, excerpt, tags }) => ({
+				slug,
+				title,
+				date,
+				excerpt,
+				tags,
+			}))
 			.sort((a, b) => {
 				if (a.date && b.date) return b.date.localeCompare(a.date);
 				if (a.date) return -1;

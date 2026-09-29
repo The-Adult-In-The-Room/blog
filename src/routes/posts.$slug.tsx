@@ -1,4 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import TagList from "../components/TagList";
 import { getPost } from "../lib/posts";
 
 export const Route = createFileRoute("/posts/$slug")({
@@ -23,15 +24,15 @@ function PostPage() {
 			</Link>
 
 			<header className="mb-10 max-w-3xl">
-				{post.date ? (
-					<time
-						dateTime={post.date}
-						className="text-sm font-medium text-[var(--sea-ink-soft)]"
-					>
-						{post.date}
-					</time>
-				) : null}
-				<h1 className="display-title mt-2 text-3xl font-bold tracking-tight text-[var(--sea-ink)] sm:text-4xl">
+				<div className="flex flex-wrap items-center gap-3 text-sm text-[var(--sea-ink-soft)]">
+					{post.date ? (
+						<time dateTime={post.date} className="font-medium">
+							{post.date}
+						</time>
+					) : null}
+					<TagList tags={post.tags} />
+				</div>
+				<h1 className="display-title mt-3 text-3xl font-bold tracking-tight text-[var(--sea-ink)] sm:text-4xl">
 					{post.title}
 				</h1>
 			</header>
