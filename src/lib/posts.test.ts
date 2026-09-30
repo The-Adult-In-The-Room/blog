@@ -380,14 +380,19 @@ describe("Given a temporary content directory", () => {
 			expect(posts[0]).not.toHaveProperty("content");
 		});
 
-		test("Then posts are sorted by number when available", async () => {
-			writePost("3_Third.md", "Third.");
-			writePost("1_First.md", "First.");
-			writePost("2_Second.md", "Second.");
+		test("Then posts are sorted by date descending regardless of numeric prefix", async () => {
+			writePost(
+				"1_Older.md",
+				["---", "date: 2026-01-01", "---", "Older."].join("\n"),
+			);
+			writePost(
+				"2_Newer.md",
+				["---", "date: 2026-12-01", "---", "Newer."].join("\n"),
+			);
 
 			const posts = await getPostsFromDir(tempDir);
 
-			expect(posts.map((p) => p.slug)).toEqual(["first", "second", "third"]);
+			expect(posts.map((p) => p.slug)).toEqual(["newer", "older"]);
 		});
 
 		test("Then posts without numbers are sorted by date descending", async () => {
@@ -433,10 +438,29 @@ describe("Given a temporary content directory", () => {
 });
 
 describe("Given a list of post summaries", () => {
-	test("When both posts have numbers, Then they are sorted by number ascending", () => {
+	test("When posts have numbers and dates, Then they are sorted by date descending", () => {
 		const posts: PostSummary[] = [
-			createPostSummary({ slug: "b", title: "B", number: 2 }),
-			createPostSummary({ slug: "a", title: "A", number: 1 }),
+			createPostSummary({
+				slug: "older",
+				title: "Older",
+				number: 1,
+				date: "2026-01-01",
+			}),
+			createPostSummary({
+				slug: "newer",
+				title: "Newer",
+				number: 2,
+				date: "2026-12-01",
+			}),
+		];
+
+		expect(sortPosts(posts).map((p) => p.slug)).toEqual(["newer", "older"]);
+	});
+
+	test("When posts share the same date, Then they are sorted by title ascending", () => {
+		const posts: PostSummary[] = [
+			createPostSummary({ slug: "b", title: "Beta", date: "2026-06-01" }),
+			createPostSummary({ slug: "a", title: "Alpha", date: "2026-06-01" }),
 		];
 
 		expect(sortPosts(posts).map((p) => p.slug)).toEqual(["a", "b"]);
