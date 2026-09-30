@@ -245,6 +245,113 @@ describe("Given a temporary content directory", () => {
 		});
 	});
 
+	describe("When frontmatter has an invalid date", () => {
+		test("Then it throws a clear error identifying the file and field", async () => {
+			const filePath = writePost(
+				"post.md",
+				["---", "date: not-a-date", "---", "Body."].join("\n"),
+			);
+
+			await expect(readPostFile(filePath)).rejects.toThrow(
+				`Invalid frontmatter in ${filePath}: date: Invalid date: "not-a-date"`,
+			);
+		});
+	});
+
+	describe("When frontmatter date is a numeric timestamp", () => {
+		test("Then it is normalized to an ISO date string", async () => {
+			const filePath = writePost(
+				"post.md",
+				["---", "date: 1727654400000", "---", "Body."].join("\n"),
+			);
+
+			const post = await readPostFile(filePath);
+
+			expect(post.date).toBe("2024-09-30");
+		});
+	});
+
+	describe("When frontmatter has an invalid title type", () => {
+		test("Then it throws a clear error identifying the field", async () => {
+			const filePath = writePost(
+				"post.md",
+				["---", "title: 123", "---", "Body."].join("\n"),
+			);
+
+			await expect(readPostFile(filePath)).rejects.toThrow(/title:/);
+			await expect(readPostFile(filePath)).rejects.toThrow(
+				/expected string, received number/i,
+			);
+		});
+	});
+
+	describe("When frontmatter has an empty title", () => {
+		test("Then it throws a clear error", async () => {
+			const filePath = writePost(
+				"post.md",
+				["---", 'title: ""', "---", "Body."].join("\n"),
+			);
+
+			await expect(readPostFile(filePath)).rejects.toThrow(
+				/Title must be a non-empty string/i,
+			);
+		});
+	});
+
+	describe("When frontmatter has an invalid slug", () => {
+		test("Then it throws a clear error", async () => {
+			const filePath = writePost(
+				"post.md",
+				["---", "slug: hello world", "---", "Body."].join("\n"),
+			);
+
+			await expect(readPostFile(filePath)).rejects.toThrow(
+				/Slug must contain only lowercase letters, numbers, and hyphens/i,
+			);
+		});
+	});
+
+	describe("When frontmatter has an invalid number type", () => {
+		test("Then it throws a clear error identifying the field", async () => {
+			const filePath = writePost(
+				"post.md",
+				["---", "number: one", "---", "Body."].join("\n"),
+			);
+
+			await expect(readPostFile(filePath)).rejects.toThrow(/number:/);
+			await expect(readPostFile(filePath)).rejects.toThrow(
+				/expected number, received string/i,
+			);
+		});
+	});
+
+	describe("When frontmatter has a non-integer number", () => {
+		test("Then it throws a clear error", async () => {
+			const filePath = writePost(
+				"post.md",
+				["---", "number: 3.14", "---", "Body."].join("\n"),
+			);
+
+			await expect(readPostFile(filePath)).rejects.toThrow(
+				/Number must be an integer/i,
+			);
+		});
+	});
+
+	describe("When frontmatter has invalid tags", () => {
+		test("Then it throws a clear error identifying the field", async () => {
+			const filePath = writePost(
+				"post.md",
+				["---", "tags: 42", "---", "Body."].join("\n"),
+			);
+
+			await expect(readPostFile(filePath)).rejects.toThrow(/tags:/);
+			await expect(readPostFile(filePath)).rejects.toThrow(
+				/Invalid frontmatter/i,
+			);
+		});
+	});
+
 	describe("When the same post file is read multiple times", () => {
 		test("Then the file is only read from disk once", async () => {
 			const filePath = writePost("1_Hello_World.md", "Body content.");

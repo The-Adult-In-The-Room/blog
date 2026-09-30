@@ -2,6 +2,10 @@ import fs from "node:fs";
 import path from "node:path";
 import { createServerFn } from "@tanstack/react-start";
 import matter from "gray-matter";
+import {
+	type PostFrontmatter,
+	postFrontmatterSchema,
+} from "#/schemas/postFrontmatter";
 import { renderMarkdown } from "./markdown";
 
 export type Post = {
@@ -75,6 +79,17 @@ export function normalizeTags(input: unknown): string[] {
 	return [];
 }
 
+function parseFrontmatter(data: unknown, filePath: string): PostFrontmatter {
+	const result = postFrontmatterSchema.safeParse(data);
+	if (!result.success) {
+		const issues = result.error.issues
+			.map((issue) => `${issue.path.join(".")}: ${issue.message}`)
+			.join("; ");
+		throw new Error(`Invalid frontmatter in ${filePath}: ${issues}`);
+	}
+	return result.data;
+}
+
 type ParsedPost = {
 	slug: string;
 	title: string;
@@ -97,14 +112,14 @@ async function parsePostFile(filePath: string): Promise<ParsedPost> {
 
 	const raw = await fs.promises.readFile(filePath, "utf-8");
 	const { data, content: rawBody } = matter(raw);
-	const slug = data.slug ?? filenameToSlug(filePath);
-	const title = data.title ?? filenameToTitle(filePath);
-	const date = data.date
-		? new Date(data.date).toISOString().slice(0, 10)
-		: null;
-	const excerpt = data.excerpt ?? extractExcerpt(rawBody);
-	const tags = normalizeTags(data.tags);
-	const number = data.number ?? filenameToNumber(filePath);
+	const frontmatter = parseFrontmatter(data, filePath);
+
+	const slug = frontmatter.slug ?? filenameToSlug(filePath);
+	const title = frontmatter.title ?? filenameToTitle(filePath);
+	const date = frontmatter.date ?? null;
+	const excerpt = frontmatter.excerpt ?? extractExcerpt(rawBody);
+	const tags = normalizeTags(frontmatter.tags);
+	const number = frontmatter.number ?? filenameToNumber(filePath);
 
 	const parsed: ParsedPost = {
 		slug,
