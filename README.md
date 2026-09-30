@@ -61,3 +61,12 @@ npm run preview
 - `npm run test:ci` – run tests with coverage enforcement (used in CI)
 - `npm run test:watch` – run tests in watch mode
 - `npm run verify` – run type checking, linting, formatting, and tests
+
+## Dependency Management
+
+TanStack dependencies (`@tanstack/react-router`, `@tanstack/react-start`) are pinned to exact versions in `package.json` to keep builds reproducible. Upgrade them deliberately rather than floating on `latest`:
+
+1. Check the latest TanStack releases.
+2. Update the pinned versions in `package.json`.
+3. Run `npm install` and `npm run verify`.
+4. Review the release notes for breaking changes before merging.
