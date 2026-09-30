@@ -148,8 +148,11 @@ export async function readPostFile(filePath: string): Promise<Post> {
 
 export function sortPosts(posts: PostSummary[]): PostSummary[] {
 	return [...posts].sort((a, b) => {
-		if (a.number && b.number) return a.number - b.number;
-		if (a.date && b.date) return b.date.localeCompare(a.date);
+		if (a.date && b.date) {
+			const dateComparison = b.date.localeCompare(a.date);
+			if (dateComparison !== 0) return dateComparison;
+			return a.title.localeCompare(b.title);
+		}
 		if (a.date) return -1;
 		if (b.date) return 1;
 		return a.title.localeCompare(b.title);
