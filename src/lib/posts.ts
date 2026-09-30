@@ -75,20 +75,60 @@ export function normalizeTags(input: unknown): string[] {
 	return [];
 }
 
-export async function readPostFile(filePath: string): Promise<Post> {
+type ParsedPost = {
+	slug: string;
+	title: string;
+	date: string | null;
+	excerpt: string;
+	rawBody: string;
+	tags: string[];
+	number: number | null;
+};
+
+const postCache = new Map<string, ParsedPost>();
+
+export function clearPostCache(): void {
+	postCache.clear();
+}
+
+async function parsePostFile(filePath: string): Promise<ParsedPost> {
+	const cached = postCache.get(filePath);
+	if (cached) return cached;
+
 	const raw = await fs.promises.readFile(filePath, "utf-8");
-	const { data, content: body } = matter(raw);
+	const { data, content: rawBody } = matter(raw);
 	const slug = data.slug ?? filenameToSlug(filePath);
 	const title = data.title ?? filenameToTitle(filePath);
 	const date = data.date
 		? new Date(data.date).toISOString().slice(0, 10)
 		: null;
-	const excerpt = data.excerpt ?? extractExcerpt(body);
-	const content = await renderMarkdown(body);
+	const excerpt = data.excerpt ?? extractExcerpt(rawBody);
 	const tags = normalizeTags(data.tags);
 	const number = data.number ?? filenameToNumber(filePath);
 
-	return { slug, title, date, excerpt, content, tags, number };
+	const parsed: ParsedPost = {
+		slug,
+		title,
+		date,
+		excerpt,
+		rawBody,
+		tags,
+		number,
+	};
+	postCache.set(filePath, parsed);
+	return parsed;
+}
+
+export async function readPostSummary(filePath: string): Promise<PostSummary> {
+	const { slug, title, date, excerpt, tags, number } =
+		await parsePostFile(filePath);
+	return { slug, title, date, excerpt, tags, number };
+}
+
+export async function readPostFile(filePath: string): Promise<Post> {
+	const { rawBody, ...metadata } = await parsePostFile(filePath);
+	const content = await renderMarkdown(rawBody);
+	return { ...metadata, content };
 }
 
 export function sortPosts(posts: PostSummary[]): PostSummary[] {
@@ -108,19 +148,10 @@ export async function getPostsFromDir(
 	const posts = await Promise.all(
 		files
 			.filter((file) => file.endsWith(".md"))
-			.map((file) => readPostFile(path.join(contentDir, file))),
+			.map((file) => readPostSummary(path.join(contentDir, file))),
 	);
 
-	return sortPosts(
-		posts.map(({ slug, title, date, excerpt, tags, number }) => ({
-			slug,
-			title,
-			date,
-			excerpt,
-			tags,
-			number,
-		})),
-	);
+	return sortPosts(posts);
 }
 
 export async function getPostFromDir(

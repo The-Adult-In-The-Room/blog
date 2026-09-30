@@ -1,9 +1,10 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { afterEach, beforeEach, describe, expect, test } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { createPostSummary } from "../test-utils/fixtures";
 import {
+	clearPostCache,
 	extractExcerpt,
 	filenameToNumber,
 	filenameToSlug,
@@ -13,6 +14,7 @@ import {
 	normalizeTags,
 	type PostSummary,
 	readPostFile,
+	readPostSummary,
 	sortPosts,
 } from "./posts";
 
@@ -136,6 +138,7 @@ describe("Given a temporary content directory", () => {
 
 	afterEach(() => {
 		fs.rmSync(tempDir, { recursive: true, force: true });
+		clearPostCache();
 	});
 
 	function writePost(filename: string, content: string): string {
@@ -170,6 +173,7 @@ describe("Given a temporary content directory", () => {
 			expect(post.tags).toEqual(["beer", "life"]);
 			expect(post.number).toBe(42);
 			expect(post.content).toContain("<p>Body content.</p>");
+			expect(post).not.toHaveProperty("rawBody");
 		});
 	});
 
@@ -217,6 +221,42 @@ describe("Given a temporary content directory", () => {
 			const post = await readPostFile(filePath);
 
 			expect(post.tags).toEqual(["beer", "life", "code"]);
+		});
+	});
+
+	describe("When reading a post summary", () => {
+		test("Then metadata is returned without rendered content", async () => {
+			const filePath = writePost(
+				"1_Hello_World.md",
+				["---", "title: Summary Title", "---", "Body content."].join("\n"),
+			);
+
+			const summary = await readPostSummary(filePath);
+
+			expect(summary).toEqual({
+				slug: "hello-world",
+				title: "Summary Title",
+				date: null,
+				excerpt: "Body content.",
+				tags: [],
+				number: 1,
+			});
+			expect(summary).not.toHaveProperty("content");
+		});
+	});
+
+	describe("When the same post file is read multiple times", () => {
+		test("Then the file is only read from disk once", async () => {
+			const filePath = writePost("1_Hello_World.md", "Body content.");
+			const readFileSpy = vi.spyOn(fs.promises, "readFile");
+
+			await readPostSummary(filePath);
+			await readPostFile(filePath);
+
+			expect(readFileSpy).toHaveBeenCalledTimes(1);
+			expect(readFileSpy).toHaveBeenCalledWith(filePath, "utf-8");
+
+			readFileSpy.mockRestore();
 		});
 	});
 
