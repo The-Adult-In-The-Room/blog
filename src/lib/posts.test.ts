@@ -172,8 +172,22 @@ describe("Given a temporary content directory", () => {
 			expect(post.excerpt).toBe("Frontmatter excerpt.");
 			expect(post.tags).toEqual(["beer", "life"]);
 			expect(post.number).toBe(42);
+			expect(post.draft).toBe(false);
 			expect(post.content).toContain("<p>Body content.</p>");
 			expect(post).not.toHaveProperty("rawBody");
+		});
+	});
+
+	describe("When reading a post file marked as draft", () => {
+		test("Then draft is true", async () => {
+			const filePath = writePost(
+				"draft-post.md",
+				["---", "draft: true", "---", "Body content."].join("\n"),
+			);
+
+			const post = await readPostFile(filePath);
+
+			expect(post.draft).toBe(true);
 		});
 	});
 
@@ -240,6 +254,7 @@ describe("Given a temporary content directory", () => {
 				excerpt: "Body content.",
 				tags: [],
 				number: 1,
+				draft: false,
 			});
 			expect(summary).not.toHaveProperty("content");
 		});
@@ -380,6 +395,35 @@ describe("Given a temporary content directory", () => {
 			expect(posts[0]).not.toHaveProperty("content");
 		});
 
+		test("Then draft posts are hidden in production", async () => {
+			vi.stubEnv("NODE_ENV", "production");
+			writePost("1_Published.md", "Published post.");
+			writePost(
+				"2_Draft.md",
+				["---", "draft: true", "---", "Draft."].join("\n"),
+			);
+
+			const posts = await getPostsFromDir(tempDir);
+
+			expect(posts).toHaveLength(1);
+			expect(posts[0].slug).toBe("published");
+			vi.unstubAllEnvs();
+		});
+
+		test("Then draft posts are visible outside production", async () => {
+			vi.stubEnv("NODE_ENV", "development");
+			writePost("1_Published.md", "Published post.");
+			writePost(
+				"2_Draft.md",
+				["---", "draft: true", "---", "Draft."].join("\n"),
+			);
+
+			const posts = await getPostsFromDir(tempDir);
+
+			expect(posts).toHaveLength(2);
+			vi.unstubAllEnvs();
+		});
+
 		test("Then posts are sorted by date descending regardless of numeric prefix", async () => {
 			writePost(
 				"1_Older.md",
@@ -433,6 +477,33 @@ describe("Given a temporary content directory", () => {
 			const post = await getPostFromDir(tempDir, "missing");
 
 			expect(post).toBeNull();
+		});
+
+		test("Then null is returned for a draft post in production", async () => {
+			vi.stubEnv("NODE_ENV", "production");
+			writePost(
+				"draft-post.md",
+				["---", "draft: true", "---", "Draft body."].join("\n"),
+			);
+
+			const post = await getPostFromDir(tempDir, "draft-post");
+
+			expect(post).toBeNull();
+			vi.unstubAllEnvs();
+		});
+
+		test("Then a draft post is returned outside production", async () => {
+			vi.stubEnv("NODE_ENV", "development");
+			writePost(
+				"draft-post.md",
+				["---", "draft: true", "---", "Draft body."].join("\n"),
+			);
+
+			const post = await getPostFromDir(tempDir, "draft-post");
+
+			expect(post).not.toBeNull();
+			expect(post?.draft).toBe(true);
+			vi.unstubAllEnvs();
 		});
 	});
 });

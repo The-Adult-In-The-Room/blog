@@ -16,11 +16,12 @@ export type Post = {
 	content: string;
 	tags: string[];
 	number: number | null;
+	draft: boolean;
 };
 
 export type PostSummary = Pick<
 	Post,
-	"slug" | "title" | "date" | "excerpt" | "tags" | "number"
+	"slug" | "title" | "date" | "excerpt" | "tags" | "number" | "draft"
 >;
 
 export const CONTENT_DIR = path.resolve("content");
@@ -98,6 +99,7 @@ type ParsedPost = {
 	rawBody: string;
 	tags: string[];
 	number: number | null;
+	draft: boolean;
 };
 
 const postCache = new Map<string, ParsedPost>();
@@ -121,6 +123,8 @@ async function parsePostFile(filePath: string): Promise<ParsedPost> {
 	const tags = normalizeTags(frontmatter.tags);
 	const number = frontmatter.number ?? filenameToNumber(filePath);
 
+	const draft = frontmatter.draft ?? false;
+
 	const parsed: ParsedPost = {
 		slug,
 		title,
@@ -129,15 +133,24 @@ async function parsePostFile(filePath: string): Promise<ParsedPost> {
 		rawBody,
 		tags,
 		number,
+		draft,
 	};
 	postCache.set(filePath, parsed);
 	return parsed;
 }
 
+function isProduction(): boolean {
+	return process.env.NODE_ENV === "production" || import.meta.env.PROD;
+}
+
+function isPublished(post: { draft: boolean }): boolean {
+	return !post.draft || !isProduction();
+}
+
 export async function readPostSummary(filePath: string): Promise<PostSummary> {
-	const { slug, title, date, excerpt, tags, number } =
+	const { slug, title, date, excerpt, tags, number, draft } =
 		await parsePostFile(filePath);
-	return { slug, title, date, excerpt, tags, number };
+	return { slug, title, date, excerpt, tags, number, draft };
 }
 
 export async function readPostFile(filePath: string): Promise<Post> {
@@ -169,7 +182,7 @@ export async function getPostsFromDir(
 			.map((file) => readPostSummary(path.join(contentDir, file))),
 	);
 
-	return sortPosts(posts);
+	return sortPosts(posts.filter(isPublished));
 }
 
 export async function getPostFromDir(
@@ -183,7 +196,8 @@ export async function getPostFromDir(
 
 	if (!file) return null;
 
-	return readPostFile(path.join(contentDir, file));
+	const post = await readPostFile(path.join(contentDir, file));
+	return isPublished(post) ? post : null;
 }
 
 /* c8 ignore start */

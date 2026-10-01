@@ -31,12 +31,13 @@ title: Hello World
 date: 2026-09-28
 slug: hello-world
 excerpt: A short summary of the post.
+draft: true
 ---
 
 Your post content here.
 ```
 
-If frontmatter is omitted, the title is inferred from the filename.
+If frontmatter is omitted, the title is inferred from the filename. Set `draft: true` to hide a post from production builds while keeping it visible in development for preview.
 
 ## Building for Production
 

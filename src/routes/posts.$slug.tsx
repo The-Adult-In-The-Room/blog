@@ -10,6 +10,28 @@ export async function postLoader({ params }: { params: { slug: string } }) {
 
 export const Route = createFileRoute("/posts/$slug")({
 	loader: postLoader,
+	head: ({ loaderData }) => {
+		const post = loaderData;
+		const title = post?.title ?? "Post";
+		const description = post?.excerpt ?? "";
+		const meta = [
+			{ title },
+			{ name: "description", content: description },
+			{ property: "og:title", content: title },
+			{ property: "og:description", content: description },
+			{ property: "og:type", content: "article" },
+			{ name: "twitter:card", content: "summary" },
+		];
+
+		if (post?.date) {
+			meta.push({
+				property: "article:published_time",
+				content: post.date,
+			});
+		}
+
+		return { meta };
+	},
 	component: PostPage,
 });
 
