@@ -7,6 +7,7 @@ export const beerPostSummary: PostSummary = {
 	excerpt: "About beer.",
 	tags: ["beer", "life"],
 	number: 1,
+	draft: false,
 };
 
 export const lifePostSummary: PostSummary = {
@@ -16,6 +17,7 @@ export const lifePostSummary: PostSummary = {
 	excerpt: "About life.",
 	tags: ["life"],
 	number: 2,
+	draft: false,
 };
 
 export const codePostSummary: PostSummary = {
@@ -25,6 +27,7 @@ export const codePostSummary: PostSummary = {
 	excerpt: "About code.",
 	tags: ["code"],
 	number: 3,
+	draft: false,
 };
 
 export const helloWorldPostSummary: PostSummary = {
@@ -34,6 +37,7 @@ export const helloWorldPostSummary: PostSummary = {
 	excerpt: "A greeting.",
 	tags: ["life"],
 	number: 1,
+	draft: false,
 };
 
 export const allPostSummaries = [
@@ -52,6 +56,7 @@ export function createPostSummary(
 		excerpt: "",
 		tags: [],
 		number: null,
+		draft: false,
 		...overrides,
 	};
 }
@@ -65,6 +70,7 @@ export function createPost(overrides: Partial<Post> = {}): Post {
 		content: "<p>Default content.</p>",
 		tags: [],
 		number: null,
+		draft: false,
 		...overrides,
 	};
 }

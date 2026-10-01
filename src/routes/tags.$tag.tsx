@@ -10,6 +10,21 @@ export async function tagLoader({ params }: { params: { tag: string } }) {
 
 export const Route = createFileRoute("/tags/$tag")({
 	loader: tagLoader,
+	head: ({ loaderData }) => {
+		const tag = loaderData?.tag ?? "";
+		const title = tag ? `Posts tagged “${tag}”` : "Tags";
+		return {
+			meta: [
+				{ title },
+				{
+					name: "description",
+					content: `Posts tagged “${tag}” on Raymond Cox's blog.`,
+				},
+				{ property: "og:title", content: title },
+				{ property: "og:type", content: "website" },
+			],
+		};
+	},
 	component: TagPage,
 });
 

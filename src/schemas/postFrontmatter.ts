@@ -27,6 +27,7 @@ export const postFrontmatterSchema = z.object({
 		.union([z.string(), z.array(z.union([z.string(), z.number()]))])
 		.optional(),
 	number: z.number().int("Number must be an integer").optional(),
+	draft: z.boolean().optional(),
 });
 
 export type PostFrontmatter = z.infer<typeof postFrontmatterSchema>;

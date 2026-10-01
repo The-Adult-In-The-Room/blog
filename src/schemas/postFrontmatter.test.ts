@@ -10,6 +10,7 @@ describe("Given a valid post frontmatter object", () => {
 			excerpt: "Frontmatter excerpt.",
 			tags: ["beer", "life"],
 			number: 42,
+			draft: true,
 		});
 
 		expect(result.success).toBe(true);
@@ -22,6 +23,7 @@ describe("Given a valid post frontmatter object", () => {
 			excerpt: "Frontmatter excerpt.",
 			tags: ["beer", "life"],
 			number: 42,
+			draft: true,
 		});
 	});
 
