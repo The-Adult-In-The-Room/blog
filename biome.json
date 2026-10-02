@@ -9,8 +9,10 @@
 		"ignoreUnknown": false,
 		"includes": [
 			"**/src/**/*",
+			"**/e2e/**/*",
 			"**/.vscode/**/*",
 			"**/index.html",
+			"**/playwright.config.ts",
 			"**/vite.config.ts",
 			"!coverage",
 			"!.output",

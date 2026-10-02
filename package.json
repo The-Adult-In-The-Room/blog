@@ -12,7 +12,10 @@
     "dev": "vite dev --port 3000",
     "generate-routes": "tsr generate",
     "build": "vite build",
-    "preview": "vite preview",
+    "preview": "vite preview --port 3000",
+    "test:e2e:acceptance": "playwright test e2e/acceptance",
+    "test:e2e:smoke": "playwright test e2e/smoke",
+    "test:e2e:regression": "playwright test e2e/acceptance",
     "format": "biome format",
     "lint": "biome lint",
     "check": "biome check",
@@ -43,6 +46,8 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.5",
+    "@lightpanda/browser": "^1.6.0",
+    "@playwright/test": "^1.63.0",
     "@rolldown/plugin-babel": "^0.2.3",
     "@tailwindcss/typography": "^0.5.16",
     "@tanstack/router-cli": "^1.132.0",
@@ -58,5 +63,8 @@
     "typescript": "^6.0.2",
     "vite": "^8.0.0",
     "vitest": "^5.0.2"
+  },
+  "allowScripts": {
+    "@lightpanda/browser@1.6.0": true
   }
 }

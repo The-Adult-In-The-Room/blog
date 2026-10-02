@@ -1,0 +1,26 @@
+name: Scheduled Regression Tests
+
+on:
+  schedule:
+    # Run twice per day at 08:00 and 20:00 UTC.
+    - cron: "0 8,20 * * *"
+  workflow_dispatch:
+
+jobs:
+  regression:
+    name: Run regression tests against production
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      REGRESSION_BASE_URL: ${{ vars.REGRESSION_BASE_URL }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Require production URL
+        run: |
+          if [ -z "$REGRESSION_BASE_URL" ]; then
+            echo "Set the REGRESSION_BASE_URL repository variable to the production URL."
+            exit 1
+          fi
+      - uses: ./.github/actions/playwright-test
+        with:
+          command: test:e2e:regression
