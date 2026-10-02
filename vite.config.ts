@@ -12,8 +12,7 @@ const config = defineConfig({
 		tailwindcss(),
 		tanstackStart({
 			prerender: {
-				enabled: true,
-				crawlLinks: true,
+				enabled: false,
 			},
 		}),
 		viteReact(),

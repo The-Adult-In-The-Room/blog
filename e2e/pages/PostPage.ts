@@ -14,4 +14,8 @@ export class PostPage {
 	async goto(slug: string): Promise<void> {
 		await this.page.goto(`/posts/${slug}`);
 	}
+
+	tagLink(tag: string): Locator {
+		return this.page.locator("article header").getByRole("link", { name: tag });
+	}
 }
