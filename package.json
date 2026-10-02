@@ -45,7 +45,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.5",
+    "@biomejs/biome": "2.5.14",
     "@lightpanda/browser": "^1.6.0",
     "@playwright/test": "^1.63.0",
     "@rolldown/plugin-babel": "^0.2.3",
