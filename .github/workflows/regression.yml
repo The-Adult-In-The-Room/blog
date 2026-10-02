@@ -8,19 +8,8 @@ on:
 
 jobs:
   regression:
-    name: Run regression tests against production
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    env:
-      REGRESSION_BASE_URL: ${{ vars.REGRESSION_BASE_URL }}
-    steps:
-      - uses: actions/checkout@v7
-      - name: Require production URL
-        run: |
-          if [ -z "$REGRESSION_BASE_URL" ]; then
-            echo "Set the REGRESSION_BASE_URL repository variable to the production URL."
-            exit 1
-          fi
-      - uses: ./.github/actions/playwright-test
-        with:
-          command: test:e2e:regression
+    name: CI
+    uses: The-Adult-In-The-Room/ci-workflows/.github/workflows/regression.yml@main
+    with:
+      base-url: ${{ vars.REGRESSION_BASE_URL }}
+      base-url-required: true

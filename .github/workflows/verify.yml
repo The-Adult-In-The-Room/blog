@@ -6,18 +6,5 @@ on:
 
 jobs:
   verify:
-    name: Type check, lint, format, and unit tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: ./.github/actions/setup
-      - run: npm run verify
-
-  acceptance:
-    name: Acceptance e2e tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: ./.github/actions/playwright-test
-        with:
-          command: test:e2e:acceptance
+    name: CI
+    uses: The-Adult-In-The-Room/ci-workflows/.github/workflows/verify.yml@main
