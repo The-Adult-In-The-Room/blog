@@ -58,10 +58,31 @@ npm run preview
 - `npm run preview` – preview the production build
 - `npm run generate-routes` – regenerate the TanStack Router route tree
 - `npm run lint` / `npm run format` – run Biome
-- `npm run test` – run the test suite with coverage
-- `npm run test:ci` – run tests with coverage enforcement (used in CI)
-- `npm run test:watch` – run tests in watch mode
-- `npm run verify` – run type checking, linting, formatting, and tests
+- `npm run test` – run the unit test suite with coverage
+- `npm run test:ci` – run unit tests with coverage enforcement (used in CI)
+- `npm run test:watch` – run unit tests in watch mode
+- `npm run test:e2e:acceptance` – run the Playwright acceptance e2e suite against a local production preview
+- `npm run test:e2e:smoke` – run the Playwright smoke e2e suite against a local production preview
+- `npm run test:e2e:regression` – run the acceptance e2e suite against a live URL (`REGRESSION_BASE_URL`)
+- `npm run verify` – run type checking, linting, formatting, and unit tests
+
+## CI Workflows
+
+- **Verify** (`verify.yml`) — runs on pull requests. It runs the `verify` job (type checking, Biome, unit tests) and the `acceptance` e2e job in parallel.
+- **Smoke Tests** (`smoke.yml`) — runs on pushes to `main`. This is the pre-deploy smoke test that Railway waits on before deploying.
+- **Regression Tests** (`regression.yml`) — runs on a schedule (08:00 and 20:00 UTC) and via `workflow_dispatch` against the live production site. Set the `REGRESSION_BASE_URL` repository variable to the deployed URL.
+
+## E2E Browser
+
+The Playwright suites run against a local [Lightpanda](https://lightpanda.io/) browser over CDP instead of launching Chromium. Lightpanda is started automatically in global setup (`e2e/fixtures/globalSetup.ts`) and the `browser` fixture in `e2e/fixtures/test.ts` connects Playwright with `chromium.connectOverCDP("ws://127.0.0.1:9222")`.
+
+Download the Lightpanda binary before running e2e tests for the first time:
+
+```bash
+npx lightpanda install
+```
+
+The binary is cached at `~/.cache/lightpanda-node/lightpanda`.
 
 ## Dependency Management
 
