@@ -24,7 +24,9 @@ export type PostSummary = Pick<
 	"slug" | "title" | "date" | "excerpt" | "tags" | "number" | "draft"
 >;
 
-export const CONTENT_DIR = path.resolve("content");
+export const CONTENT_DIR = process.env.BLOG_CONTENT_DIR
+	? path.resolve(process.env.BLOG_CONTENT_DIR)
+	: path.resolve("content");
 
 export function filenameToSlug(filename: string): string {
 	const base = path.basename(filename, path.extname(filename));

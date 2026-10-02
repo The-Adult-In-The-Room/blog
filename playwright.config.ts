@@ -1,3 +1,4 @@
+import path from "node:path";
 import { defineConfig } from "@playwright/test";
 
 const BASE_URL =
@@ -36,6 +37,9 @@ export default defineConfig({
 				reuseExistingServer: !process.env.CI,
 				stdout: "pipe",
 				stderr: "ignore",
+				env: {
+					BLOG_CONTENT_DIR: path.resolve("e2e/fixtures/content"),
+				},
 			}
 		: undefined,
 });

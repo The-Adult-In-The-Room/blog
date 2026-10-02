@@ -131,6 +131,32 @@ describe("Given markdown body content", () => {
 	});
 });
 
+describe("Given the BLOG_CONTENT_DIR environment variable", () => {
+	test("When it is set, Then CONTENT_DIR resolves to the custom directory", async () => {
+		const customDir = fs.mkdtempSync(
+			path.join(os.tmpdir(), "blog-content-env-test-"),
+		);
+		fs.writeFileSync(
+			path.join(customDir, "1_Env_Post.md"),
+			"Body content.",
+			"utf-8",
+		);
+
+		vi.stubEnv("BLOG_CONTENT_DIR", customDir);
+		vi.resetModules();
+		const { CONTENT_DIR, getPostsFromDir } = await import("./posts");
+		vi.unstubAllEnvs();
+
+		expect(CONTENT_DIR).toBe(path.resolve(customDir));
+		const posts = await getPostsFromDir(CONTENT_DIR);
+		expect(posts).toHaveLength(1);
+		expect(posts[0].slug).toBe("env-post");
+
+		fs.rmSync(customDir, { recursive: true, force: true });
+		clearPostCache();
+	});
+});
+
 describe("Given a temporary content directory", () => {
 	let tempDir: string;
 
