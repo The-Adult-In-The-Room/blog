@@ -32,8 +32,8 @@ describe("Given a base URL and a list of posts", () => {
 		expect(sitemap).toContain(
 			"<loc>https://example.com/posts/beer-post</loc><lastmod>2026-09-27</lastmod>",
 		);
-		expect(sitemap).toContain("<loc>https://example.com/tags/beer</loc>");
-		expect(sitemap).toContain("<loc>https://example.com/tags/life</loc>");
+		expect(sitemap).toContain("<loc>https://example.com/?tag=beer</loc>");
+		expect(sitemap).toContain("<loc>https://example.com/?tag=life</loc>");
 	});
 
 	test("When a post has no date, Then lastmod is omitted", () => {
@@ -65,6 +65,6 @@ describe("Given a base URL and a list of posts", () => {
 
 		const sitemap = generateSitemap("https://example.com", posts);
 
-		expect(sitemap).toContain("<loc>https://example.com/tags/a&amp;b</loc>");
+		expect(sitemap).toContain("<loc>https://example.com/?tag=a&amp;b</loc>");
 	});
 });
