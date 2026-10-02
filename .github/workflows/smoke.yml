@@ -7,4 +7,4 @@ on:
 jobs:
   smoke:
     name: CI
-    uses: The-Adult-In-The-Room/ci-workflows/.github/workflows/smoke.yml@main
+    uses: The-Adult-In-The-Room/ci-workflows/.github/workflows/smoke.yml@v1.0.0
