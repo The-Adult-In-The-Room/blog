@@ -159,6 +159,25 @@ export async function readPostFile(filePath: string): Promise<Post> {
 	return { ...metadata, content };
 }
 
+export function getAllTags(posts: PostSummary[]): string[] {
+	const tagSet = new Set<string>();
+	for (const post of posts) {
+		for (const tag of post.tags) {
+			tagSet.add(tag);
+		}
+	}
+	return Array.from(tagSet).sort();
+}
+
+export function filterPostsByTag(
+	posts: PostSummary[],
+	tag: string | undefined,
+): PostSummary[] {
+	if (!tag) return posts;
+	const normalized = tag.toLowerCase().trim();
+	return posts.filter((post) => post.tags.includes(normalized));
+}
+
 export function sortPosts(posts: PostSummary[]): PostSummary[] {
 	return [...posts].sort((a, b) => {
 		if (a.date && b.date) {

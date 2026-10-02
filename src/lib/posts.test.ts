@@ -9,6 +9,8 @@ import {
 	filenameToNumber,
 	filenameToSlug,
 	filenameToTitle,
+	filterPostsByTag,
+	getAllTags,
 	getPostFromDir,
 	getPostsFromDir,
 	normalizeTags,
@@ -505,6 +507,53 @@ describe("Given a temporary content directory", () => {
 			expect(post?.draft).toBe(true);
 			vi.unstubAllEnvs();
 		});
+	});
+});
+
+describe("Given a list of post summaries with tags", () => {
+	test("When getting all tags, Then unique tags are returned sorted", () => {
+		const posts: PostSummary[] = [
+			createPostSummary({ slug: "b", title: "B", tags: ["beer", "code"] }),
+			createPostSummary({ slug: "a", title: "A", tags: ["beer", "life"] }),
+		];
+
+		expect(getAllTags(posts)).toEqual(["beer", "code", "life"]);
+	});
+
+	test("When no posts have tags, Then an empty array is returned", () => {
+		const posts: PostSummary[] = [createPostSummary({ slug: "a", title: "A" })];
+
+		expect(getAllTags(posts)).toEqual([]);
+	});
+
+	test("When filtering by tag, Then only matching posts are returned", () => {
+		const posts: PostSummary[] = [
+			createPostSummary({ slug: "beer-post", title: "Beer", tags: ["beer"] }),
+			createPostSummary({ slug: "code-post", title: "Code", tags: ["code"] }),
+		];
+
+		expect(filterPostsByTag(posts, "beer").map((p) => p.slug)).toEqual([
+			"beer-post",
+		]);
+	});
+
+	test("When filtering with mixed-case or whitespace, Then the tag is normalized", () => {
+		const posts: PostSummary[] = [
+			createPostSummary({ slug: "beer-post", title: "Beer", tags: ["beer"] }),
+		];
+
+		expect(filterPostsByTag(posts, "  BEER  ").map((p) => p.slug)).toEqual([
+			"beer-post",
+		]);
+	});
+
+	test("When no tag is provided, Then all posts are returned", () => {
+		const posts: PostSummary[] = [
+			createPostSummary({ slug: "a", title: "A", tags: ["beer"] }),
+			createPostSummary({ slug: "b", title: "B", tags: ["code"] }),
+		];
+
+		expect(filterPostsByTag(posts, undefined)).toEqual(posts);
 	});
 });
 

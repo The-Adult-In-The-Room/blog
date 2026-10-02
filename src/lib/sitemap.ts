@@ -22,7 +22,7 @@ export function generateSitemap(baseUrl: string, posts: PostSummary[]): string {
 	}
 
 	for (const tag of uniqueTags(posts)) {
-		const loc = `${origin}/tags/${tag}`;
+		const loc = `${origin}/?tag=${tag}`;
 		urls.push(`<url><loc>${escapeXml(loc)}</loc></url>`);
 	}
 
