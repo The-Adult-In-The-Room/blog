@@ -28,6 +28,13 @@ export default defineConfig({
 			name: "acceptance",
 			testDir: "./e2e/acceptance",
 		},
+		{
+			// Content-agnostic invariants. Safe to run against any deployment:
+			// nothing here names a post or a tag, so the same suite holds for
+			// the fixtures locally and for production content.
+			name: "regression",
+			testDir: "./e2e/regression",
+		},
 	],
 	webServer: isLocal
 		? {
