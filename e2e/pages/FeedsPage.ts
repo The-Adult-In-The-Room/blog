@@ -25,6 +25,12 @@ type Sitemap = {
 export class FeedsPage {
 	constructor(readonly request: APIRequestContext) {}
 
+	/** Status code for an in-site path, resolved against the configured base URL. */
+	async statusFor(path: string): Promise<number> {
+		const response = await this.request.get(path);
+		return response.status();
+	}
+
 	async fetchRss(): Promise<RssFeed> {
 		const response = await this.request.get("/rss.xml");
 		const raw = await response.text();
