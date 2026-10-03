@@ -9,7 +9,7 @@ on:
 jobs:
   regression:
     name: CI
-    uses: The-Adult-In-The-Room/ci-workflows/.github/workflows/regression.yml@v1.0.0
+    uses: The-Adult-In-The-Room/ci-workflows/.github/workflows/regression.yml@v1.0.1
     with:
       base-url: ${{ vars.REGRESSION_BASE_URL }}
       base-url-required: true
