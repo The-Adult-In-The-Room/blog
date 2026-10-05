@@ -7,4 +7,4 @@ on:
 jobs:
   verify:
     name: CI
-    uses: The-Adult-In-The-Room/ci-workflows/.github/workflows/verify.yml@v1.0.1
+    uses: The-Adult-In-The-Room/ci-workflows/.github/workflows/verify.yml@v2.0.0
