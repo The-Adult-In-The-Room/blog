@@ -14,7 +14,7 @@
     "build": "vite build",
     "preview": "vite preview --port 3000",
     "test:e2e:acceptance": "playwright test e2e/acceptance",
-    "test:e2e:smoke": "playwright test e2e/smoke",
+    "test:e2e:smoke": "playwright test --config=e2e/playwright.smoke.config.ts",
     "test:e2e:regression": "playwright test e2e/regression",
     "format": "biome format",
     "lint": "biome lint",

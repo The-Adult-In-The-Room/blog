@@ -1,0 +1,15 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  CI:
+    uses: The-Adult-In-The-Room/ci-workflows/.github/workflows/deploy-and-smoke.yml@v2.1.1
+    with:
+      project: ${{ vars.RAILWAY_PROJECT }}
+      service: ${{ vars.RAILWAY_SERVICE }}
+      environment: production
+    secrets:
+      railway-token: ${{ secrets.RAILWAY_TOKEN }}
