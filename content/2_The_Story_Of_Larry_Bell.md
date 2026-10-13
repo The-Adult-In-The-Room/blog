@@ -9,11 +9,11 @@ tags:
 
 I attended Kalamazoo Valley Community College (KVCC) back in spring 2026 for the brewing program. I was in a class with two gals. One gal was a bartender in Kalamazoo at various establishments past decade. 
 
-She told me a story about when she worked at a dive bar on the side of town. One night there was this older gentleman who came in and sat at the bar. He clearly had already been drinking, but he ordered an Oberon on draft.
+She told me a story about when she worked at a dive bar on the side of town. One night there was this older gentleman who came in and sat at the bar. He ordered an Oberon on draft.
 
-Oberon is a citrusy American wheat ale, the type of beer which screams for an orange slice. She poured his beer, then garnished the glass with an orange. 
+Oberon is a citrusy American wheat ale, the type of beer which squeels for an orange slice. She poured his beer, then garnished the glass with an orange. 
 
-She slid the beer across the bar, which prompted the man to scrunch up his face. He grabbed the orange slice from the glass, and threw it at her. Then he shouted "Put some respect on this beer, it was never intended to be served with an orange". Shook up, she walked to the kitchen and told a waitress what just happened. The waitress looked out into the bar room, then said "Oh that's Larry Bell, he created Oberon."
+She slid the beer across the bar, which prompted the man to scrunch up his face. He grabbed the orange slice from the glass, and threw it at her. Then he shouted "Put some fucking respect on this beer, it was never intended to be served with an orange". Shook up, she walked to the kitchen and told a waitress what just happened. The waitress looked out into the bar room, then said "Oh that's Larry Bell, he created Oberon."
 
 After hearing that story I've never drank an Oberon with an orange slice again. Much to my wife's dismay, I've even gone as far as sharing this story with various wait staff who ask me if I'd like an orange with my Oberon. I want to give Oberon and the creator the respect they both deeply deserve.
 

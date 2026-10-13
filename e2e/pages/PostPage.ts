@@ -31,4 +31,8 @@ export class PostPage {
 		const labels = await this.allTagLinks.allTextContents();
 		return labels.map((label) => label.trim());
 	}
+
+	contentLink(name: string): Locator {
+		return this.page.locator("article .prose").getByRole("link", { name });
+	}
 }
