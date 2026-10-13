@@ -38,7 +38,7 @@ This blog will never be about:
 - Pseudo-Intellectualism
 - Ads/Shilling
 
-I will also __never__ use AI to write, revise, publish, or anything related to the creative writing process.
+I will also __never__ use Artificial Intelligence to write, revise, publish, or anything related to the creative writing process. We only do raw and unfiltered human stupidity here baby.
 
 ### What this... is?
 
