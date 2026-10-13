@@ -38,6 +38,8 @@ This blog will never be about:
 - Pseudo-Intellectualism
 - Ads/Shilling
 
+I will also __never__ use AI to write, revise, publish, or anything related to the creative writing process.
+
 ### What this... is?
 
 I don't even know if I'm being honest. I just feel like I got shit to say, and it's kinda therapeutic to get it down on ~~markdown~~ paper. 
