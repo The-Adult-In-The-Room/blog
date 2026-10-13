@@ -2,6 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { createServerFn } from "@tanstack/react-start";
 import matter from "gray-matter";
+import type { Link, Parent, Root } from "mdast";
+import type { Plugin } from "unified";
 import {
 	type PostFrontmatter,
 	postFrontmatterSchema,
@@ -105,9 +107,11 @@ type ParsedPost = {
 };
 
 const postCache = new Map<string, ParsedPost>();
+const slugMapCache = new Map<string, ReadonlyMap<string, string>>();
 
 export function clearPostCache(): void {
 	postCache.clear();
+	slugMapCache.clear();
 }
 
 async function parsePostFile(filePath: string): Promise<ParsedPost> {
@@ -149,6 +153,84 @@ function isPublished(post: { draft: boolean }): boolean {
 	return !post.draft || !isProduction();
 }
 
+async function buildSlugMap(
+	contentDir: string,
+): Promise<ReadonlyMap<string, string>> {
+	const cached = slugMapCache.get(contentDir);
+	if (cached) return cached;
+
+	const files = await fs.promises.readdir(contentDir);
+	const map = new Map<string, string>();
+
+	await Promise.all(
+		files
+			.filter((file) => file.endsWith(".md"))
+			.map(async (file) => {
+				const filePath = path.join(contentDir, file);
+				try {
+					const { slug } = await parsePostFile(filePath);
+					map.set(file, slug);
+				} catch {
+					// Skip files with invalid frontmatter; they cannot be linked reliably.
+				}
+			}),
+	);
+
+	slugMapCache.set(contentDir, map);
+	return map;
+}
+
+function visitLinks(tree: Root, visitor: (link: Link) => void): void {
+	function walk(node: Parent | Link): void {
+		if (node.type === "link") {
+			visitor(node as Link);
+			return;
+		}
+
+		if ("children" in node && Array.isArray(node.children)) {
+			for (const child of node.children) {
+				walk(child as Parent | Link);
+			}
+		}
+	}
+
+	walk(tree);
+}
+
+function resolveInternalMarkdownLink(
+	url: string,
+	slugMap: ReadonlyMap<string, string>,
+): string | undefined {
+	const hashIndex = url.indexOf("#");
+	const [pathPart, hash] =
+		hashIndex === -1
+			? [url, ""]
+			: [url.slice(0, hashIndex), url.slice(hashIndex)];
+
+	if (!pathPart.endsWith(".md")) return undefined;
+
+	const filename = pathPart.startsWith("./") ? pathPart.slice(2) : pathPart;
+	if (filename.includes("/")) return undefined;
+
+	const slug = slugMap.get(filename);
+	if (!slug) return undefined;
+
+	return `/posts/${slug}${hash}`;
+}
+
+function createRemarkPostLinks(
+	slugMap: ReadonlyMap<string, string>,
+): Plugin<[], Root> {
+	return function remarkPostLinks() {
+		return (tree: Root) => {
+			visitLinks(tree, (node) => {
+				const resolved = resolveInternalMarkdownLink(node.url, slugMap);
+				if (resolved) node.url = resolved;
+			});
+		};
+	};
+}
+
 export async function readPostSummary(filePath: string): Promise<PostSummary> {
 	const { slug, title, date, excerpt, tags, number, draft } =
 		await parsePostFile(filePath);
@@ -157,7 +239,11 @@ export async function readPostSummary(filePath: string): Promise<PostSummary> {
 
 export async function readPostFile(filePath: string): Promise<Post> {
 	const { rawBody, ...metadata } = await parsePostFile(filePath);
-	const content = await renderMarkdown(rawBody);
+	const contentDir = path.dirname(filePath);
+	const slugMap = await buildSlugMap(contentDir);
+	const content = await renderMarkdown(rawBody, [
+		createRemarkPostLinks(slugMap),
+	]);
 	return { ...metadata, content };
 }
 

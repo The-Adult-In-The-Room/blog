@@ -253,6 +253,151 @@ describe("Given a temporary content directory", () => {
 		});
 	});
 
+	describe("When a post links to another post by markdown filename", () => {
+		test("Then the link is rewritten to the post route", async () => {
+			writePost(
+				"1_Rules_Of_Engagement.md",
+				["---", "title: Rules of Engagement", "---", "Body."].join("\n"),
+			);
+			const filePath = writePost(
+				"3_I_Cleaned_My_Car.md",
+				"Remember the [Rules of Engagement](./1_Rules_Of_Engagement.md)?",
+			);
+
+			const post = await readPostFile(filePath);
+
+			expect(post.content).toContain(
+				'<a href="/posts/rules-of-engagement">Rules of Engagement</a>',
+			);
+		});
+
+		test("Then a hash fragment is preserved", async () => {
+			writePost(
+				"1_Rules_Of_Engagement.md",
+				["---", "title: Rules of Engagement", "---", "Body."].join("\n"),
+			);
+			const filePath = writePost(
+				"3_I_Cleaned_My_Car.md",
+				"See the [intro](./1_Rules_Of_Engagement.md#intro).",
+			);
+
+			const post = await readPostFile(filePath);
+
+			expect(post.content).toContain(
+				'<a href="/posts/rules-of-engagement#intro">intro</a>',
+			);
+		});
+
+		test("Then a link without the ./ prefix is also rewritten", async () => {
+			writePost(
+				"1_Rules_Of_Engagement.md",
+				["---", "title: Rules of Engagement", "---", "Body."].join("\n"),
+			);
+			const filePath = writePost(
+				"3_I_Cleaned_My_Car.md",
+				"Read [Rules of Engagement](1_Rules_Of_Engagement.md).",
+			);
+
+			const post = await readPostFile(filePath);
+
+			expect(post.content).toContain(
+				'<a href="/posts/rules-of-engagement">Rules of Engagement</a>',
+			);
+		});
+
+		test("Then the linked post's frontmatter slug takes precedence over the filename", async () => {
+			writePost(
+				"1_Rules_Of_Engagement.md",
+				["---", "title: Rules of Engagement", "slug: roe", "---", "Body."].join(
+					"\n",
+				),
+			);
+			const filePath = writePost(
+				"3_I_Cleaned_My_Car.md",
+				"Read [Rules of Engagement](./1_Rules_Of_Engagement.md).",
+			);
+
+			const post = await readPostFile(filePath);
+
+			expect(post.content).toContain(
+				'<a href="/posts/roe">Rules of Engagement</a>',
+			);
+		});
+
+		test("Then external URLs are not rewritten", async () => {
+			const filePath = writePost(
+				"3_I_Cleaned_My_Car.md",
+				"Read [something](https://example.com/page.md).",
+			);
+
+			const post = await readPostFile(filePath);
+
+			expect(post.content).toContain(
+				'<a href="https://example.com/page.md">something</a>',
+			);
+		});
+
+		test("Then links to unknown markdown files are not rewritten", async () => {
+			const filePath = writePost(
+				"3_I_Cleaned_My_Car.md",
+				"Read [missing](./Missing_Post.md).",
+			);
+
+			const post = await readPostFile(filePath);
+
+			expect(post.content).toContain('<a href="./Missing_Post.md">missing</a>');
+		});
+
+		test("Then links to non-markdown files are not rewritten", async () => {
+			const filePath = writePost(
+				"3_I_Cleaned_My_Car.md",
+				"Read [pdf](./document.pdf).",
+			);
+
+			const post = await readPostFile(filePath);
+
+			expect(post.content).toContain('<a href="./document.pdf">pdf</a>');
+		});
+
+		test("Then links with directory traversal are not rewritten", async () => {
+			const filePath = writePost(
+				"3_I_Cleaned_My_Car.md",
+				"Read [other](../other-dir/Other_Post.md).",
+			);
+
+			const post = await readPostFile(filePath);
+
+			expect(post.content).toContain(
+				'<a href="../other-dir/Other_Post.md">other</a>',
+			);
+		});
+
+		test("Then the slug map is reused across post reads in the same directory", async () => {
+			writePost(
+				"1_Rules_Of_Engagement.md",
+				["---", "title: Rules of Engagement", "---", "Body."].join("\n"),
+			);
+			const firstPath = writePost(
+				"2_First_Post.md",
+				"Read [Rules of Engagement](./1_Rules_Of_Engagement.md).",
+			);
+			const secondPath = writePost(
+				"3_Second_Post.md",
+				"Also read [Rules of Engagement](./1_Rules_Of_Engagement.md).",
+			);
+
+			const firstPost = await readPostFile(firstPath);
+			const secondPost = await readPostFile(secondPath);
+
+			expect(firstPost.content).toContain(
+				'<a href="/posts/rules-of-engagement">Rules of Engagement</a>',
+			);
+			expect(secondPost.content).toContain(
+				'<a href="/posts/rules-of-engagement">Rules of Engagement</a>',
+			);
+		});
+	});
+
 	describe("When tags are provided as a comma-separated frontmatter string", () => {
 		test("Then they are normalized to an array", async () => {
 			const filePath = writePost(
@@ -625,6 +770,15 @@ describe("Given a list of post summaries", () => {
 		const posts: PostSummary[] = [
 			createPostSummary({ slug: "undated", title: "Undated" }),
 			createPostSummary({ slug: "dated", title: "Dated", date: "2026-06-01" }),
+		];
+
+		expect(sortPosts(posts).map((p) => p.slug)).toEqual(["dated", "undated"]);
+	});
+
+	test("When a dated post precedes an undated post, Then the dated post still comes first", () => {
+		const posts: PostSummary[] = [
+			createPostSummary({ slug: "dated", title: "Dated", date: "2026-06-01" }),
+			createPostSummary({ slug: "undated", title: "Undated" }),
 		];
 
 		expect(sortPosts(posts).map((p) => p.slug)).toEqual(["dated", "undated"]);

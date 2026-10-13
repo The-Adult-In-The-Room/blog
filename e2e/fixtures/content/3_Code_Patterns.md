@@ -7,4 +7,4 @@ tags:
   - patterns
 ---
 
-Design patterns are reusable solutions to commonly occurring problems in software design.
+Design patterns are reusable solutions to commonly occurring problems in software design. For a different kind of pattern, see [Brewing Basics](./2_Brewing_Basics.md).
