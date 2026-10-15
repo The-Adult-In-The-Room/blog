@@ -8,3 +8,7 @@ jobs:
   verify:
     name: CI
     uses: The-Adult-In-The-Room/ci-workflows/.github/workflows/verify.yml@v2.1.1
+    with:
+      run-lighthouse: true
+    secrets:
+      lhci-github-app-token: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
