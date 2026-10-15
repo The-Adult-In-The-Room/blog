@@ -25,9 +25,6 @@
     "test:ci": "vitest run --coverage",
     "test:watch": "vitest",
     "verify": "tsc && biome ci && npm run test:ci",
-    "verify:full": "npm run verify && npm run lighthouse:build",
-    "lighthouse": "lhci autorun",
-    "lighthouse:build": "npm run build && npm run lighthouse",
     "start": "node .output/server/index.mjs"
   },
   "dependencies": {

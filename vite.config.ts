@@ -7,8 +7,14 @@ import { defineConfig } from "vite";
 
 const config = defineConfig({
 	resolve: { tsconfigPaths: true },
+	build: {
+		sourcemap: true,
+	},
 	plugins: [
-		nitro({ rollupConfig: { external: [/^@sentry\//] } }),
+		nitro({
+			compressPublicAssets: true,
+			rollupConfig: { external: [/^@sentry\//] },
+		}),
 		tailwindcss(),
 		tanstackStart({
 			prerender: {
