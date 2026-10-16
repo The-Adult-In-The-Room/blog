@@ -64,4 +64,30 @@ describe("Given the server entry", async () => {
 		expect(await response.text()).toBe("OK");
 		expect(startHandler).toHaveBeenCalledWith(request);
 	});
+
+	test("When /rss.xml is requested with X-Forwarded-Proto, Then the origin reflects the forwarded scheme", async () => {
+		const request = new Request("http://example.com/rss.xml", {
+			headers: { "X-Forwarded-Proto": "https" },
+		});
+		const response = await server.fetch(request);
+
+		expect(response.status).toBe(200);
+		expect(generateRss).toHaveBeenCalledWith("https://example.com", []);
+	});
+
+	test("When /sitemap.xml is requested with X-Forwarded-Proto and X-Forwarded-Host, Then the origin reflects both headers", async () => {
+		const request = new Request("http://internal.example.com/sitemap.xml", {
+			headers: {
+				"X-Forwarded-Proto": "https",
+				"X-Forwarded-Host": "public.example.com",
+			},
+		});
+		const response = await server.fetch(request);
+
+		expect(response.status).toBe(200);
+		expect(generateSitemap).toHaveBeenCalledWith(
+			"https://public.example.com",
+			[],
+		);
+	});
 });
