@@ -329,13 +329,6 @@ export const getPosts = createServerFn({ method: "GET" }).handler(
 	async (): Promise<PostSummary[]> => getPostsFromDir(CONTENT_DIR),
 );
 
-export const getTags = createServerFn({ method: "GET" }).handler(
-	async (): Promise<TagCount[]> => {
-		const posts = await getPostsFromDir(CONTENT_DIR);
-		return getTagCounts(posts);
-	},
-);
-
 export const getPost = createServerFn({ method: "GET" })
 	.validator((slug: string) => slug)
 	.handler(
