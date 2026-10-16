@@ -26,9 +26,11 @@ export type PostSummary = Pick<
 	"slug" | "title" | "date" | "excerpt" | "tags" | "number" | "draft"
 >;
 
-export const CONTENT_DIR = process.env.BLOG_CONTENT_DIR
-	? path.resolve(process.env.BLOG_CONTENT_DIR)
-	: path.resolve("content");
+export function getContentDir(): string {
+	return process.env.BLOG_CONTENT_DIR
+		? path.resolve(process.env.BLOG_CONTENT_DIR)
+		: path.resolve("content");
+}
 
 export function filenameToSlug(filename: string): string {
 	const base = path.basename(filename, path.extname(filename));
@@ -326,13 +328,13 @@ export async function getPostFromDir(
 
 /* c8 ignore start */
 export const getPosts = createServerFn({ method: "GET" }).handler(
-	async (): Promise<PostSummary[]> => getPostsFromDir(CONTENT_DIR),
+	async (): Promise<PostSummary[]> => getPostsFromDir(getContentDir()),
 );
 
 export const getPost = createServerFn({ method: "GET" })
 	.validator((slug: string) => slug)
 	.handler(
 		async ({ data: slug }): Promise<Post | null> =>
-			getPostFromDir(CONTENT_DIR, slug),
+			getPostFromDir(getContentDir(), slug),
 	);
 /* c8 ignore stop */
