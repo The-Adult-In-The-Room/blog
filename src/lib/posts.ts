@@ -1,14 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import { createServerFn } from "@tanstack/react-start";
-import matter from "gray-matter";
 import type { Link, Parent, Root } from "mdast";
 import type { Plugin } from "unified";
-import {
-	type PostFrontmatter,
-	postFrontmatterSchema,
-} from "#/schemas/postFrontmatter";
-import { renderMarkdown } from "./markdown";
+import type { PostFrontmatter } from "#/schemas/postFrontmatter";
 
 export type Post = {
 	slug: string;
@@ -86,11 +81,24 @@ export function normalizeTags(input: unknown): string[] {
 	return [];
 }
 
-function parseFrontmatter(data: unknown, filePath: string): PostFrontmatter {
-	const result = postFrontmatterSchema.safeParse(data);
+function parseFrontmatter(
+	data: unknown,
+	filePath: string,
+	schema: {
+		safeParse: (data: unknown) =>
+			| { success: true; data: unknown }
+			| {
+					success: false;
+					error: {
+						issues: Array<{ path: Array<PropertyKey>; message: string }>;
+					};
+			  };
+	},
+): unknown {
+	const result = schema.safeParse(data);
 	if (!result.success) {
 		const issues = result.error.issues
-			.map((issue) => `${issue.path.join(".")}: ${issue.message}`)
+			.map((issue) => `${String(issue.path.join("."))}: ${issue.message}`)
 			.join("; ");
 		throw new Error(`Invalid frontmatter in ${filePath}: ${issues}`);
 	}
@@ -120,9 +128,18 @@ async function parsePostFile(filePath: string): Promise<ParsedPost> {
 	const cached = postCache.get(filePath);
 	if (cached) return cached;
 
+	const [{ default: matter }, { postFrontmatterSchema }] = await Promise.all([
+		import("gray-matter"),
+		import("#/schemas/postFrontmatter"),
+	]);
+
 	const raw = await fs.promises.readFile(filePath, "utf-8");
 	const { data, content: rawBody } = matter(raw);
-	const frontmatter = parseFrontmatter(data, filePath);
+	const frontmatter = parseFrontmatter(
+		data,
+		filePath,
+		postFrontmatterSchema,
+	) as PostFrontmatter;
 
 	const slug = frontmatter.slug ?? filenameToSlug(filePath);
 	const title = frontmatter.title ?? filenameToTitle(filePath);
@@ -243,6 +260,7 @@ export async function readPostFile(filePath: string): Promise<Post> {
 	const { rawBody, ...metadata } = await parsePostFile(filePath);
 	const contentDir = path.dirname(filePath);
 	const slugMap = await buildSlugMap(contentDir);
+	const { renderMarkdown } = await import("./markdown");
 	const content = await renderMarkdown(rawBody, [
 		createRemarkPostLinks(slugMap),
 	]);

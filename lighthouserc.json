@@ -22,7 +22,7 @@
 
 				"color-contrast": ["error", { "minScore": 1 }],
 				"errors-in-console": ["error", { "minScore": 1 }],
-				"unused-javascript": ["error", { "minScore": 0 }],
+				"unused-javascript": ["error", { "minScore": 0.5 }],
 				"document-latency-insight": ["error", { "minScore": 0.5 }],
 				"network-dependency-tree-insight": ["error", { "minScore": 0 }]
 			}
