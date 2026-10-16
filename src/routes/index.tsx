@@ -1,12 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { z } from "zod";
-import TagFilter from "../components/TagFilter";
 import TagList from "../components/TagList";
-import { filterPostsByTag, getAllTags, getPosts } from "../lib/posts";
-
-const homeSearchSchema = z.object({
-	tag: z.string().optional().catch(undefined),
-});
+import { getPosts } from "../lib/posts";
 
 export async function homeLoader() {
 	return getPosts();
@@ -14,18 +8,11 @@ export async function homeLoader() {
 
 export const Route = createFileRoute("/")({
 	loader: homeLoader,
-	validateSearch: homeSearchSchema,
 	component: Home,
 });
 
 function Home() {
 	const posts = Route.useLoaderData();
-	const { tag } = Route.useSearch();
-	const activeTag = tag?.toLowerCase().trim();
-
-	const filteredPosts = filterPostsByTag(posts, activeTag);
-
-	const allTags = getAllTags(posts);
 
 	return (
 		<main className="page-wrap px-4 py-12 sm:py-16">
@@ -41,20 +28,13 @@ function Home() {
 					<h2 className="text-sm font-semibold uppercase tracking-wider text-[var(--sea-ink-soft)]">
 						Recent posts
 					</h2>
-					<TagFilter tags={allTags} activeTag={activeTag} />
 				</div>
 
-				{filteredPosts.length === 0 ? (
-					activeTag ? (
-						<p className="text-[var(--sea-ink-soft)]">
-							No posts found with the tag “{activeTag}”.
-						</p>
-					) : (
-						<p className="text-[var(--sea-ink-soft)]">No posts yet.</p>
-					)
+				{posts.length === 0 ? (
+					<p className="text-[var(--sea-ink-soft)]">No posts yet.</p>
 				) : (
 					<ul className="m-0 space-y-4 p-0">
-						{filteredPosts.map((post) => (
+						{posts.map((post) => (
 							<li key={post.slug} className="list-none">
 								<Link
 									to="/posts/$slug"

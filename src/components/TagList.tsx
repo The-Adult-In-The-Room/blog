@@ -18,8 +18,8 @@ export default function TagList({
 				return asLinks ? (
 					<Link
 						key={tag}
-						to="/"
-						search={{ tag }}
+						to="/tags/$tag"
+						params={{ tag }}
 						className={`${className} no-underline`}
 					>
 						{tag}
