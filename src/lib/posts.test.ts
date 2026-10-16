@@ -133,7 +133,7 @@ describe("Given markdown body content", () => {
 });
 
 describe("Given the BLOG_CONTENT_DIR environment variable", () => {
-	test("When it is set, Then CONTENT_DIR resolves to the custom directory", async () => {
+	test("When it is set, Then getContentDir() resolves to the custom directory", async () => {
 		const customDir = fs.mkdtempSync(
 			path.join(os.tmpdir(), "blog-content-env-test-"),
 		);
@@ -145,14 +145,16 @@ describe("Given the BLOG_CONTENT_DIR environment variable", () => {
 
 		vi.stubEnv("BLOG_CONTENT_DIR", customDir);
 		vi.resetModules();
-		const { CONTENT_DIR, getPostsFromDir } = await import("./posts");
-		vi.unstubAllEnvs();
+		const { getContentDir, getPostsFromDir } = await import("./posts");
 
-		expect(CONTENT_DIR).toBe(path.resolve(customDir));
-		const posts = await getPostsFromDir(CONTENT_DIR);
+		const resolvedDir = getContentDir();
+		expect(resolvedDir).toBe(path.resolve(customDir));
+
+		const posts = await getPostsFromDir(resolvedDir);
 		expect(posts).toHaveLength(1);
 		expect(posts[0].slug).toBe("env-post");
 
+		vi.unstubAllEnvs();
 		fs.rmSync(customDir, { recursive: true, force: true });
 		clearPostCache();
 	});

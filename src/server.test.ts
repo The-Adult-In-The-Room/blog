@@ -13,7 +13,7 @@ const generateSitemap = vi.fn(() => "<urlset></urlset>");
 const getPostsFromDir = vi.fn(async () => []);
 
 vi.mock("./lib/posts", () => ({
-	CONTENT_DIR: "/content",
+	getContentDir: () => "/content",
 	getPostsFromDir,
 }));
 
