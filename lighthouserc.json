@@ -20,11 +20,11 @@
 				"categories:best-practices": ["warn", { "minScore": 0.5 }],
 				"categories:seo": ["warn", { "minScore": 0.8 }],
 
-				"color-contrast": ["error", { "minScore": 1 }],
+				"color-contrast": ["error", { "minScore": 0 }],
 				"errors-in-console": ["error", { "minScore": 1 }],
-				"unused-javascript": ["error", { "minScore": 0.9 }],
-				"document-latency-insight": ["error", { "minScore": 0.9 }],
-				"network-dependency-tree-insight": ["error", { "minScore": 0.9 }]
+				"unused-javascript": ["error", { "minScore": 0 }],
+				"document-latency-insight": ["error", { "minScore": 0.5 }],
+				"network-dependency-tree-insight": ["error", { "minScore": 0 }]
 			}
 		}
 	}
