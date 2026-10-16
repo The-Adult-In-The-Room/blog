@@ -1,5 +1,4 @@
 import { expect, test } from "../fixtures/test";
-import { ALL_CHIP } from "../pages/HomePage";
 import { toPath } from "../support/url";
 
 /**
@@ -41,13 +40,21 @@ test.describe("GIVEN the deployed RSS feed", () => {
 });
 
 test.describe("GIVEN the deployed XML sitemap", () => {
-	test("WHEN requesting /sitemap.xml, THEN it lists the home page, every post, and one URL per tag chip", async ({
+	test("WHEN requesting /sitemap.xml, THEN it lists the home page, every post, and one URL per tag", async ({
 		feedsPage,
 		homePage,
+		tagsPage,
 	}) => {
 		await homePage.goto();
 		const cards = await homePage.postCardSummaries();
-		const labels = await homePage.tagChipLabels();
+		const cardTags = [...new Set(cards.flatMap((card) => card.tags))].sort();
+
+		await tagsPage.goto();
+		const tagLinkLabels = await tagsPage.tagLinks.allTextContents();
+		const tagLinkTags = tagLinkLabels
+			.map((label) => label.replace(/\s*\d+\s*$/, "").trim())
+			.sort();
+
 		const sitemap = await feedsPage.fetchSitemap();
 
 		expect(sitemap.status).toBe(200);
@@ -56,16 +63,19 @@ test.describe("GIVEN the deployed XML sitemap", () => {
 			'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
 		);
 
-		await test.step("Then the URL set matches what the home page advertises", async () => {
+		await test.step("Then the URL set matches what the site advertises", async () => {
 			const expected = [
 				"/",
+				"/tags",
 				...cards.map((card) => toPath(card.href)),
-				...labels
-					.filter((label) => label !== ALL_CHIP)
-					.map((label) => `/?tag=${label}`),
+				...cardTags.map((tag) => `/tags/${tag}`),
 			].sort();
 
 			expect(sitemap.locs.map(toPath).sort()).toEqual(expected);
+		});
+
+		await test.step("Then the tag index links match the card tags", async () => {
+			expect(tagLinkTags).toEqual(cardTags);
 		});
 	});
 

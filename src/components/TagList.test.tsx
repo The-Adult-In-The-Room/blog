@@ -7,32 +7,32 @@ vi.mock("@tanstack/react-router", () => ({
 	Link: ({
 		children,
 		to,
-		search,
+		params,
 		className,
 	}: {
 		children: React.ReactNode;
 		to: string;
-		search?: { tag?: string };
+		params?: { tag?: string };
 		className?: string;
-	}) => (
-		<a
-			href={search?.tag ? `${to}?tag=${search.tag}` : to}
-			className={className}
-		>
-			{children}
-		</a>
-	),
+	}) => {
+		const href = params?.tag ? to.replace("$tag", params.tag) : to;
+		return (
+			<a href={href} className={className}>
+				{children}
+			</a>
+		);
+	},
 }));
 
 describe("Given a list of tags", () => {
-	test("When rendered with default props, Then tags are rendered as links to the homepage filter", () => {
+	test("When rendered with default props, Then tags are rendered as links to the tag page", () => {
 		render(<TagList tags={["beer", "code"]} />);
 
 		const beerLink = screen.getByRole("link", { name: "beer" });
 		const codeLink = screen.getByRole("link", { name: "code" });
 
-		expect(beerLink).toHaveAttribute("href", "/?tag=beer");
-		expect(codeLink).toHaveAttribute("href", "/?tag=code");
+		expect(beerLink).toHaveAttribute("href", "/tags/beer");
+		expect(codeLink).toHaveAttribute("href", "/tags/code");
 	});
 
 	test("When asLinks is false, Then tags are rendered as non-clickable badges", () => {

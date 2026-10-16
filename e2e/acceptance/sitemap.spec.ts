@@ -17,7 +17,7 @@ test.describe("GIVEN the XML sitemap endpoint", () => {
 				loc.includes("/posts/the-story-of-larry-bell"),
 			),
 		).toBe(true);
-		expect(sitemap.locs.some((loc) => loc.includes("/?tag=beer"))).toBe(true);
-		expect(sitemap.locs.some((loc) => loc.includes("/?tag=life"))).toBe(true);
+		expect(sitemap.locs.some((loc) => loc.includes("/tags/beer"))).toBe(true);
+		expect(sitemap.locs.some((loc) => loc.includes("/tags/life"))).toBe(true);
 	});
 });

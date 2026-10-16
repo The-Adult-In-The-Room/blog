@@ -3,6 +3,7 @@ import { FeedsPage } from "../pages/FeedsPage";
 import { HomePage } from "../pages/HomePage";
 import { NotFoundPage } from "../pages/NotFoundPage";
 import { PostPage } from "../pages/PostPage";
+import { TagsPage } from "../pages/TagsPage";
 import { LIGHTPANDA_WS_ENDPOINT } from "./lightpanda";
 
 export * from "@playwright/test";
@@ -12,6 +13,7 @@ export const test = base.extend<{
 	homePage: HomePage;
 	notFoundPage: NotFoundPage;
 	postPage: PostPage;
+	tagsPage: TagsPage;
 }>({
 	browser: async (
 		// biome-ignore lint/correctness/noEmptyPattern: Playwright fixture signature requires object destructuring.
@@ -33,5 +35,8 @@ export const test = base.extend<{
 	},
 	postPage: async ({ page }, use) => {
 		await use(new PostPage(page));
+	},
+	tagsPage: async ({ page }, use) => {
+		await use(new TagsPage(page));
 	},
 });

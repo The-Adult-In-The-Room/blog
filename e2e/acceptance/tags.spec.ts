@@ -1,6 +1,6 @@
 import { expect, test } from "../fixtures/test";
 
-const EXPECTED_TAGS = ["All", "beer", "brewing", "code", "life", "patterns"];
+const EXPECTED_TAGS = ["beer", "brewing", "code", "life", "patterns"];
 
 const BEER_POSTS = [
 	"The story of Larry Bell",
@@ -8,84 +8,79 @@ const BEER_POSTS = [
 	"Another Beer Story",
 ];
 
-test.describe("GIVEN the home page has posts with tags", () => {
-	test("WHEN the page is loaded, THEN the tag filter renders All and every unique tag", async ({
-		homePage,
+test.describe("GIVEN the tags index page", () => {
+	test("WHEN the page is loaded, THEN every unique tag is listed as a link", async ({
+		tagsPage,
 	}) => {
-		await homePage.goto();
+		await tagsPage.goto();
 
-		await expect(homePage.tagFilter).toBeVisible();
-		for (const label of EXPECTED_TAGS) {
-			await expect(homePage.tagChip(label)).toBeVisible();
+		await expect(tagsPage.heading).toBeVisible();
+		await expect(tagsPage.heading).toHaveText("Tags");
+
+		for (const tag of EXPECTED_TAGS) {
+			await expect(tagsPage.tagLink(tag)).toBeVisible();
 		}
 	});
 
-	test("WHEN a tag chip is clicked, THEN the URL updates and only matching posts are shown", async ({
-		homePage,
+	test("WHEN a tag link is clicked, THEN it navigates to the tag page", async ({
+		tagsPage,
 	}) => {
-		await homePage.goto();
+		await tagsPage.goto();
 
-		await test.step("Click the beer tag chip", async () => {
-			await homePage.tagChip("beer").click();
-		});
+		await tagsPage.tagLink("beer").click();
 
-		await test.step("Then the URL reflects the active filter", async () => {
-			await expect(homePage.page).toHaveURL(/\?tag=beer$/);
-		});
+		await expect(tagsPage.page).toHaveURL("/tags/beer");
+		await expect(tagsPage.heading).toContainText("beer");
+	});
+});
 
-		await test.step("Then every matching post card is visible", async () => {
-			await expect(homePage.postCards).toHaveCount(BEER_POSTS.length);
-			for (const title of BEER_POSTS) {
-				await expect(homePage.postCard(title)).toBeVisible();
-			}
-		});
+test.describe("GIVEN a tag page", () => {
+	test("WHEN the page is loaded, THEN only matching posts are shown", async ({
+		tagsPage,
+	}) => {
+		await tagsPage.gotoTag("beer");
+
+		await expect(tagsPage.heading).toContainText("beer");
+
+		for (const title of BEER_POSTS) {
+			await expect(tagsPage.postCard(title)).toBeVisible();
+		}
+		await expect(tagsPage.postCards).toHaveCount(BEER_POSTS.length);
 	});
 
-	test("WHEN a tag is active, THEN that chip has aria-current=page and links home", async ({
-		homePage,
+	test("WHEN the page is loaded, THEN all tag chips are shown with the active one marked", async ({
+		tagsPage,
 	}) => {
-		await homePage.gotoWithTag("beer");
+		await tagsPage.gotoTag("beer");
 
-		const activeChip = homePage.tagChip("beer");
+		const activeChip = tagsPage.tagChip("beer");
 		await expect(activeChip).toHaveAttribute("aria-current", "page");
-		await expect(activeChip).toHaveAttribute("href", "/");
 
-		await expect(homePage.tagChip("life")).toHaveAttribute(
-			"href",
-			"/?tag=life",
+		await expect(tagsPage.tagChip("life")).toBeVisible();
+		await expect(tagsPage.tagChip("life")).not.toHaveAttribute(
+			"aria-current",
+			"page",
 		);
 	});
 
-	test("WHEN the active tag chip is clicked, THEN the filter clears and the URL returns to /", async ({
-		homePage,
+	test("WHEN another tag chip is clicked, THEN it navigates to that tag page", async ({
+		tagsPage,
 	}) => {
-		await homePage.gotoWithTag("beer");
+		await tagsPage.gotoTag("beer");
 
-		await homePage.tagChip("beer").click();
+		await tagsPage.tagChip("life").click();
 
-		await expect(homePage.page).toHaveURL("/");
-		await expect(homePage.postCards).toHaveCount(5);
-	});
-
-	test("WHEN the All chip is clicked, THEN the active filter clears and the URL returns to /", async ({
-		homePage,
-	}) => {
-		await homePage.gotoWithTag("beer");
-
-		await homePage.tagChip("All").click();
-
-		await expect(homePage.page).toHaveURL("/");
-		await expect(homePage.postCards).toHaveCount(5);
+		await expect(tagsPage.page).toHaveURL("/tags/life");
 	});
 
 	test("WHEN navigating to an unknown tag, THEN an empty-state message is rendered", async ({
-		homePage,
+		tagsPage,
 	}) => {
-		await homePage.gotoWithTag("unknown");
+		await tagsPage.gotoTag("unknown");
 
-		await expect(homePage.emptyState).toBeVisible();
-		await expect(homePage.emptyState).toContainText("unknown");
-		await expect(homePage.postCards).toHaveCount(0);
+		await expect(tagsPage.emptyState).toBeVisible();
+		await expect(tagsPage.emptyState).toContainText("unknown");
+		await expect(tagsPage.postCards).toHaveCount(0);
 	});
 });
 
@@ -119,19 +114,18 @@ test.describe("GIVEN a home page post card", () => {
 		await expect(postPage.heading).toHaveText("The story of Larry Bell");
 	});
 
-	test("WHEN a post has no tags, THEN the card renders and does not contribute to the filter", async ({
+	test("WHEN a post has no tags, THEN the card renders without tag badges", async ({
 		homePage,
 	}) => {
 		await homePage.goto();
 
 		await expect(homePage.postCard("Untagged Post")).toBeVisible();
 		await expect(homePage.postCardTags("Untagged Post")).toHaveCount(0);
-		await expect(homePage.tagFilter).not.toContainText("Untagged Post");
 	});
 });
 
 test.describe("GIVEN a post detail page", () => {
-	test("WHEN the page is loaded, THEN tags are rendered as links to the filtered homepage", async ({
+	test("WHEN the page is loaded, THEN tags are rendered as links to the tag page", async ({
 		postPage,
 	}) => {
 		await postPage.goto("the-story-of-larry-bell");
@@ -140,38 +134,42 @@ test.describe("GIVEN a post detail page", () => {
 		await expect(postPage.tagLink("life")).toBeVisible();
 		await expect(postPage.tagLink("beer")).toHaveAttribute(
 			"href",
-			"/?tag=beer",
+			"/tags/beer",
+		);
+		await expect(postPage.tagLink("life")).toHaveAttribute(
+			"href",
+			"/tags/life",
 		);
 	});
 
-	test("WHEN a tag link is clicked, THEN it navigates to the filtered homepage", async ({
-		homePage,
+	test("WHEN a tag link is clicked, THEN it navigates to the tag page", async ({
+		tagsPage,
 		postPage,
 	}) => {
 		await postPage.goto("the-story-of-larry-bell");
 
 		await postPage.tagLink("life").click();
 
-		await expect(homePage.page).toHaveURL(/\?tag=life$/);
-		await expect(homePage.postCards).toHaveCount(1);
-		await expect(homePage.postCard("The story of Larry Bell")).toBeVisible();
+		await expect(tagsPage.page).toHaveURL("/tags/life");
+		await expect(tagsPage.postCards).toHaveCount(1);
+		await expect(tagsPage.postCard("The story of Larry Bell")).toBeVisible();
 	});
 });
 
 test.describe("GIVEN multiple posts share a tag", () => {
-	test("WHEN filtering by that tag, THEN all matching posts are shown in descending date order", async ({
-		homePage,
+	test("WHEN visiting that tag page, THEN all matching posts are shown in descending date order", async ({
+		tagsPage,
 	}) => {
-		await homePage.gotoWithTag("beer");
+		await tagsPage.gotoTag("beer");
 
-		await expect(homePage.postCards).toHaveCount(3);
-		await expect(homePage.postCards).toContainText([
+		await expect(tagsPage.postCards).toHaveCount(3);
+		await expect(tagsPage.postCards).toContainText([
 			"The story of Larry Bell",
 			"Brewing Basics",
 			"Another Beer Story",
 		]);
 
-		const titles = await homePage.postCards.locator("h3").allTextContents();
+		const titles = await tagsPage.postCards.locator("h3").allTextContents();
 		expect(titles).toEqual([
 			"The story of Larry Bell",
 			"Brewing Basics",

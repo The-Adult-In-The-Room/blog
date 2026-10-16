@@ -13,7 +13,10 @@ function uniqueTags(posts: PostSummary[]): string[] {
 
 export function generateSitemap(baseUrl: string, posts: PostSummary[]): string {
 	const origin = baseUrl.replace(/\/$/, "");
-	const urls: string[] = [`<url><loc>${escapeXml(origin)}/</loc></url>`];
+	const urls: string[] = [
+		`<url><loc>${escapeXml(origin)}/</loc></url>`,
+		`<url><loc>${escapeXml(origin)}/tags</loc></url>`,
+	];
 
 	for (const post of posts) {
 		const loc = `${origin}/posts/${post.slug}`;
@@ -22,7 +25,7 @@ export function generateSitemap(baseUrl: string, posts: PostSummary[]): string {
 	}
 
 	for (const tag of uniqueTags(posts)) {
-		const loc = `${origin}/?tag=${tag}`;
+		const loc = `${origin}/tags/${tag}`;
 		urls.push(`<url><loc>${escapeXml(loc)}</loc></url>`);
 	}
 

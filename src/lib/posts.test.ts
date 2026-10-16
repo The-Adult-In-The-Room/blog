@@ -13,6 +13,7 @@ import {
 	getAllTags,
 	getPostFromDir,
 	getPostsFromDir,
+	getTagCounts,
 	normalizeTags,
 	type PostSummary,
 	readPostFile,
@@ -802,5 +803,31 @@ describe("Given a list of post summaries", () => {
 		sortPosts(posts);
 
 		expect(posts.map((p) => p.slug)).toEqual(["b", "a"]);
+	});
+});
+
+describe("Given a list of posts with tags", () => {
+	test("When getting tag counts, Then it returns each tag with its post count sorted alphabetically", () => {
+		const posts: PostSummary[] = [
+			createPostSummary({ tags: ["beer", "life"] }),
+			createPostSummary({ tags: ["beer", "code"] }),
+			createPostSummary({ tags: ["life"] }),
+		];
+
+		const result = getTagCounts(posts);
+
+		expect(result).toEqual([
+			{ tag: "beer", count: 2 },
+			{ tag: "code", count: 1 },
+			{ tag: "life", count: 2 },
+		]);
+	});
+
+	test("When getting tag counts for posts with no tags, Then it returns an empty array", () => {
+		const posts: PostSummary[] = [createPostSummary({ tags: [] })];
+
+		const result = getTagCounts(posts);
+
+		expect(result).toEqual([]);
 	});
 });
