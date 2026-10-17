@@ -9,7 +9,7 @@ export default function Header() {
 					to="/"
 					className="text-base font-semibold tracking-tight text-[var(--sea-ink)] no-underline transition hover:text-[var(--lagoon-deep)]"
 				>
-					Raymond Cox
+					It's Giving Winning
 				</Link>
 
 				<ThemeToggle />

@@ -6,7 +6,7 @@ test.describe("GIVEN the home page", () => {
 	}) => {
 		await homePage.goto();
 
-		await expect(homePage.page).toHaveTitle("Raymond Cox");
+		await expect(homePage.page).toHaveTitle("It's Giving Winning");
 		await expect(homePage.descriptionMeta).toHaveAttribute(
 			"content",
 			"Thoughts on code, brewing, and whatever nonsense is rattling around in my head.",

@@ -1,7 +1,7 @@
 import type { PostSummary } from "./posts";
 import { escapeXml } from "./xml";
 
-export const RSS_TITLE = "Raymond Cox";
+export const RSS_TITLE = "It's Giving Winning";
 export const RSS_DESCRIPTION =
 	"Thoughts on code, brewing, and whatever nonsense is rattling around in my head.";
 

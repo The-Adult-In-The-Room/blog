@@ -8,7 +8,7 @@ test.describe("GIVEN the RSS feed endpoint", () => {
 
 		expect(rss.status).toBe(200);
 		expect(rss.contentType).toBe("application/rss+xml; charset=utf-8");
-		expect(rss.channelTitle).toBe("Raymond Cox");
+		expect(rss.channelTitle).toBe("It's Giving Winning");
 		expect(rss.items.length).toBeGreaterThan(0);
 		expect(
 			rss.items.some((item) => item.title === "The story of Larry Bell"),
