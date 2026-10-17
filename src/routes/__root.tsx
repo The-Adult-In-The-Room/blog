@@ -25,7 +25,7 @@ export const Route = createRootRoute({
 				content: "width=device-width, initial-scale=1",
 			},
 			{
-				title: "Raymond Cox",
+				title: "It's Giving Winning",
 			},
 			{
 				name: "description",
@@ -33,7 +33,7 @@ export const Route = createRootRoute({
 			},
 			{
 				property: "og:site_name",
-				content: "Raymond Cox",
+				content: "It's Giving Winning",
 			},
 			{
 				property: "og:type",
@@ -41,7 +41,7 @@ export const Route = createRootRoute({
 			},
 			{
 				property: "og:title",
-				content: "Raymond Cox",
+				content: "It's Giving Winning",
 			},
 			{
 				property: "og:description",
@@ -74,7 +74,7 @@ export const Route = createRootRoute({
 			{
 				rel: "alternate",
 				type: "application/rss+xml",
-				title: "Raymond Cox",
+				title: "It's Giving Winning",
 				href: "/rss.xml",
 			},
 		],

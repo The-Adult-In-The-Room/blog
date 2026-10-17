@@ -22,7 +22,7 @@ test.describe("GIVEN the deployed RSS feed", () => {
 
 		expect(rss.status).toBe(200);
 		expect(rss.contentType).toBe("application/rss+xml; charset=utf-8");
-		expect(rss.channelTitle).toBe("Raymond Cox");
+		expect(rss.channelTitle).toBe("It's Giving Winning");
 
 		await test.step("Then the item set matches the post cards", async () => {
 			expect(cards.length).toBeGreaterThan(0);

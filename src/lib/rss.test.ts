@@ -17,7 +17,9 @@ describe("Given a base URL and a list of posts", () => {
 
 		expect(rss).toContain('<?xml version="1.0" encoding="UTF-8"?>');
 		expect(rss).toContain('<rss version="2.0">');
-		expect(rss).toContain(`<title>${RSS_TITLE}</title>`);
+		expect(rss).toContain(
+			`<title>${RSS_TITLE.replace(/'/g, "&apos;")}</title>`,
+		);
 		expect(rss).toContain(`<description>${RSS_DESCRIPTION}</description>`);
 		expect(rss).toContain("<link>https://example.com</link>");
 		expect(rss).toContain("<item>");
