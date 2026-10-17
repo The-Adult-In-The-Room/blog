@@ -19,6 +19,14 @@ jobs:
       run-lighthouse: false
     secrets: inherit
 
+  # Lighthouse target: runs the lighthouse workflow
+  lighthouse:
+    name: canary / lighthouse
+    if: contains(github.event.client_payload.targets, 'lighthouse')
+    uses: The-Adult-In-The-Room/ci-workflows/.github/workflows/lighthouse.yml@canary
+    secrets:
+      lhci-github-app-token: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
   # Deploy target: runs deploy-and-smoke against the Railway canary environment
   deploy:
     name: canary / deploy
@@ -34,7 +42,7 @@ jobs:
   # Report results back to ci-workflows PR as status checks
   report-status:
     name: Report canary status
-    needs: [verify, deploy]
+    needs: [verify, lighthouse, deploy]
     if: always() && github.event.client_payload.pr
     runs-on: ubuntu-latest
     steps:
@@ -67,6 +75,37 @@ jobs:
               state: state,
               description: description,
               context: 'canary / verify',
+              target_url: `https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}`
+            });
+
+      - name: Report lighthouse status
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.CANARY_PAT }}
+          script: |
+            const pr = ${{ github.event.client_payload.pr }};
+            const sha = '${{ github.event.client_payload.ref }}';
+            const lighthouseResult = '${{ needs.lighthouse.result }}';
+            
+            const stateMap = {
+              'success': 'success',
+              'failure': 'failure',
+              'skipped': 'success',
+              'cancelled': 'error'
+            };
+            
+            const state = stateMap[lighthouseResult] || 'pending';
+            const description = lighthouseResult === 'skipped' 
+              ? 'Lighthouse target skipped' 
+              : `Lighthouse workflow ${lighthouseResult}`;
+            
+            await github.rest.repos.createCommitStatus({
+              owner: 'The-Adult-In-The-Room',
+              repo: 'ci-workflows',
+              sha: sha,
+              state: state,
+              description: description,
+              context: 'canary / lighthouse',
               target_url: `https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}`
             });
 
