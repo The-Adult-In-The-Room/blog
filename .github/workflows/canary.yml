@@ -23,11 +23,36 @@ on:
         type: string
 
 jobs:
+  # Setup job: normalize inputs from both trigger types
+  setup:
+    name: setup
+    runs-on: ubuntu-latest
+    outputs:
+      ref: ${{ steps.params.outputs.ref }}
+      targets: ${{ steps.params.outputs.targets }}
+      pr: ${{ steps.params.outputs.pr }}
+    steps:
+      - name: Normalize parameters
+        id: params
+        run: |
+          # For repository_dispatch, params come from client_payload
+          # For workflow_dispatch, params come from inputs
+          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            echo "ref=${{ github.event.client_payload.ref }}" >> $GITHUB_OUTPUT
+            echo "targets=${{ github.event.client_payload.targets }}" >> $GITHUB_OUTPUT
+            echo "pr=${{ github.event.client_payload.pr }}" >> $GITHUB_OUTPUT
+          else
+            echo "ref=${{ inputs.ref }}" >> $GITHUB_OUTPUT
+            echo "targets=${{ inputs.targets }}" >> $GITHUB_OUTPUT
+            echo "pr=${{ inputs.pr }}" >> $GITHUB_OUTPUT
+          fi
+
   # Verify target: runs the verify workflow
   verify:
     name: canary / verify
-    if: contains(fromJSON(github.event.inputs.targets || github.event.client_payload.targets), 'verify')
-    uses: The-Adult-In-The-Room/ci-workflows/.github/workflows/verify.yml@${{ github.event.inputs.ref || github.event.client_payload.ref }}
+    needs: setup
+    if: contains(fromJSON(needs.setup.outputs.targets), 'verify')
+    uses: The-Adult-In-The-Room/ci-workflows/.github/workflows/verify.yml@${{ needs.setup.outputs.ref }}
     with:
       run-lighthouse: false
     secrets: inherit
@@ -35,8 +60,9 @@ jobs:
   # Deploy target: runs deploy-and-smoke against the Railway canary environment
   deploy:
     name: canary / deploy
-    if: contains(fromJSON(github.event.inputs.targets || github.event.client_payload.targets), 'deploy')
-    uses: The-Adult-In-The-Room/ci-workflows/.github/workflows/deploy-and-smoke.yml@${{ github.event.inputs.ref || github.event.client_payload.ref }}
+    needs: setup
+    if: contains(fromJSON(needs.setup.outputs.targets), 'deploy')
+    uses: The-Adult-In-The-Room/ci-workflows/.github/workflows/deploy-and-smoke.yml@${{ needs.setup.outputs.ref }}
     with:
       project: ${{ vars.RAILWAY_CANARY_PROJECT }}
       service: ${{ vars.RAILWAY_SERVICE }}
