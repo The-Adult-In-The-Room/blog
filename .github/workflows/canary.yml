@@ -1,5 +1,7 @@
-# Canary workflow: runs ci-workflows reusable workflows against a supplied ref.
+# Canary workflow: runs ci-workflows reusable workflows against the `canary` tag.
 # Triggered by repository_dispatch from ci-workflows PRs.
+# The ci-workflows dispatcher moves the `canary` tag to the PR head commit
+# before dispatching, so we always test the latest changes.
 
 name: Canary
 
@@ -12,7 +14,7 @@ jobs:
   verify:
     name: canary / verify
     if: contains(fromJSON(github.event.client_payload.targets), 'verify')
-    uses: The-Adult-In-The-Room/ci-workflows/.github/workflows/verify.yml@${{ github.event.client_payload.ref }}
+    uses: The-Adult-In-The-Room/ci-workflows/.github/workflows/verify.yml@canary
     with:
       run-lighthouse: false
     secrets: inherit
@@ -21,7 +23,7 @@ jobs:
   deploy:
     name: canary / deploy
     if: contains(fromJSON(github.event.client_payload.targets), 'deploy')
-    uses: The-Adult-In-The-Room/ci-workflows/.github/workflows/deploy-and-smoke.yml@${{ github.event.client_payload.ref }}
+    uses: The-Adult-In-The-Room/ci-workflows/.github/workflows/deploy-and-smoke.yml@canary
     with:
       project: ${{ vars.RAILWAY_CANARY_PROJECT }}
       service: ${{ vars.RAILWAY_SERVICE }}
