@@ -26,6 +26,9 @@
 				"critical-request-chains": ["error", { "minScore": 1 }],
 				"render-blocking-resources": "error"
 			}
+		},
+		"upload": {
+      "target": "temporary-public-storage"
 		}
 	}
 }
