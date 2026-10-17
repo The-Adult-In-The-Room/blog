@@ -1,4 +1,5 @@
 import type { APIRequestContext } from "@playwright/test";
+import { decodeXmlEntities } from "../support/xml";
 
 type RssItem = {
 	title: string;
@@ -38,16 +39,23 @@ export class FeedsPage {
 		const contentType = response.headers()["content-type"] ?? null;
 
 		const channelBlock = raw.match(/<channel>(.*?)<\/channel>/s)?.[1] ?? "";
-		const channelTitle = channelBlock.match(/<title>(.*?)<\/title>/)?.[1] ?? "";
-		const channelLink = channelBlock.match(/<link>(.*?)<\/link>/)?.[1] ?? "";
+		const channelTitle = decodeXmlEntities(
+			channelBlock.match(/<title>(.*?)<\/title>/)?.[1] ?? "",
+		);
+		const channelLink = decodeXmlEntities(
+			channelBlock.match(/<link>(.*?)<\/link>/)?.[1] ?? "",
+		);
 
 		const items: RssItem[] = [];
 		for (const [, block] of raw.matchAll(/<item>(.*?)<\/item>/gs)) {
 			items.push({
-				title: block.match(/<title>(.*?)<\/title>/)?.[1] ?? "",
-				link: block.match(/<link>(.*?)<\/link>/)?.[1] ?? "",
-				description:
+				title: decodeXmlEntities(
+					block.match(/<title>(.*?)<\/title>/)?.[1] ?? "",
+				),
+				link: decodeXmlEntities(block.match(/<link>(.*?)<\/link>/)?.[1] ?? ""),
+				description: decodeXmlEntities(
 					block.match(/<description>(.*?)<\/description>/)?.[1] ?? "",
+				),
 			});
 		}
 
@@ -59,7 +67,9 @@ export class FeedsPage {
 		const raw = await response.text();
 		const status = response.status();
 		const contentType = response.headers()["content-type"] ?? null;
-		const locs = [...raw.matchAll(/<loc>(.*?)<\/loc>/g)].map(([, loc]) => loc);
+		const locs = [...raw.matchAll(/<loc>(.*?)<\/loc>/g)].map(([, loc]) =>
+			decodeXmlEntities(loc),
+		);
 
 		return { status, contentType, locs, raw };
 	}
