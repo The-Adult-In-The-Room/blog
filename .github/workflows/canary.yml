@@ -1,0 +1,141 @@
+# Canary workflow: runs ci-workflows reusable workflows against the `canary` tag.
+# Triggered by repository_dispatch from ci-workflows PRs.
+# The ci-workflows dispatcher moves the `canary` tag to the PR head commit
+# before dispatching, so we always test the latest changes.
+
+name: Canary
+
+on:
+  repository_dispatch:
+    types: [canary]
+
+jobs:
+  # Verify target: runs the verify workflow
+  verify:
+    name: canary / verify
+    if: contains(github.event.client_payload.targets, 'verify')
+    uses: The-Adult-In-The-Room/ci-workflows/.github/workflows/verify.yml@canary
+    with:
+      run-lighthouse: false
+    secrets: inherit
+
+  # Lighthouse target: runs the lighthouse workflow
+  lighthouse:
+    name: canary / lighthouse
+    if: contains(github.event.client_payload.targets, 'lighthouse')
+    uses: The-Adult-In-The-Room/ci-workflows/.github/workflows/lighthouse.yml@canary
+    secrets:
+      lhci-github-app-token: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
+  # Deploy target: runs deploy-and-smoke against the Railway canary environment
+  deploy:
+    name: canary / deploy
+    if: contains(github.event.client_payload.targets, 'deploy')
+    uses: The-Adult-In-The-Room/ci-workflows/.github/workflows/deploy-and-smoke.yml@canary
+    with:
+      project: ${{ vars.RAILWAY_CANARY_PROJECT }}
+      service: ${{ vars.RAILWAY_SERVICE }}
+      environment: canary
+    secrets:
+      railway-token: ${{ secrets.RAILWAY_CANARY_TOKEN }}
+
+  # Report results back to ci-workflows PR as status checks
+  report-status:
+    name: Report canary status
+    needs: [verify, lighthouse, deploy]
+    if: always() && github.event.client_payload.pr
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report verify status
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.CANARY_PAT }}
+          script: |
+            const pr = ${{ github.event.client_payload.pr }};
+            const sha = '${{ github.event.client_payload.ref }}';
+            const verifyResult = '${{ needs.verify.result }}';
+            
+            // Map job results to GitHub status states
+            const stateMap = {
+              'success': 'success',
+              'failure': 'failure',
+              'skipped': 'success',
+              'cancelled': 'error'
+            };
+            
+            const state = stateMap[verifyResult] || 'pending';
+            const description = verifyResult === 'skipped' 
+              ? 'Verify target skipped' 
+              : `Verify workflow ${verifyResult}`;
+            
+            await github.rest.repos.createCommitStatus({
+              owner: 'The-Adult-In-The-Room',
+              repo: 'ci-workflows',
+              sha: sha,
+              state: state,
+              description: description,
+              context: 'canary / verify',
+              target_url: `https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}`
+            });
+
+      - name: Report lighthouse status
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.CANARY_PAT }}
+          script: |
+            const pr = ${{ github.event.client_payload.pr }};
+            const sha = '${{ github.event.client_payload.ref }}';
+            const lighthouseResult = '${{ needs.lighthouse.result }}';
+            
+            const stateMap = {
+              'success': 'success',
+              'failure': 'failure',
+              'skipped': 'success',
+              'cancelled': 'error'
+            };
+            
+            const state = stateMap[lighthouseResult] || 'pending';
+            const description = lighthouseResult === 'skipped' 
+              ? 'Lighthouse target skipped' 
+              : `Lighthouse workflow ${lighthouseResult}`;
+            
+            await github.rest.repos.createCommitStatus({
+              owner: 'The-Adult-In-The-Room',
+              repo: 'ci-workflows',
+              sha: sha,
+              state: state,
+              description: description,
+              context: 'canary / lighthouse',
+              target_url: `https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}`
+            });
+
+      - name: Report deploy status
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.CANARY_PAT }}
+          script: |
+            const pr = ${{ github.event.client_payload.pr }};
+            const sha = '${{ github.event.client_payload.ref }}';
+            const deployResult = '${{ needs.deploy.result }}';
+            
+            const stateMap = {
+              'success': 'success',
+              'failure': 'failure',
+              'skipped': 'success',
+              'cancelled': 'error'
+            };
+            
+            const state = stateMap[deployResult] || 'pending';
+            const description = deployResult === 'skipped' 
+              ? 'Deploy target skipped' 
+              : `Deploy workflow ${deployResult}`;
+            
+            await github.rest.repos.createCommitStatus({
+              owner: 'The-Adult-In-The-Room',
+              repo: 'ci-workflows',
+              sha: sha,
+              state: state,
+              description: description,
+              context: 'canary / deploy',
+              target_url: `https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}`
+            });
