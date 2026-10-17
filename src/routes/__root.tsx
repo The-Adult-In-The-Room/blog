@@ -14,6 +14,16 @@ const SITE_DESCRIPTION =
 
 const THEME_INIT_SCRIPT = `(function(){try{var stored=window.localStorage.getItem('theme');var mode=(stored==='light'||stored==='dark'||stored==='auto')?stored:'auto';var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var resolved=mode==='auto'?(prefersDark?'dark':'light'):mode;var root=document.documentElement;root.classList.remove('light','dark');root.classList.add(resolved);if(mode==='auto'){root.removeAttribute('data-theme')}else{root.setAttribute('data-theme',mode)}root.style.colorScheme=resolved;}catch(e){}})();`;
 
+/**
+ * Deferred-stylesheet loader.
+ *
+ * The main stylesheet is rendered with `media="print"` so the browser downloads
+ * it without blocking first paint. Once it loads, this script flips `media` to
+ * `"all"` so the styles apply. If the stylesheet has already loaded by the time
+ * the script runs (e.g. from cache), it switches immediately.
+ */
+const CSS_DEFER_SCRIPT = `(function(){var s=document.querySelectorAll('link[rel="stylesheet"][media="print"]');for(var i=0;i<s.length;i++){if(s[i].sheet){s[i].media='all'}else{s[i].addEventListener('load',function(){this.media='all'})}}})();`;
+
 export const Route = createRootRoute({
 	head: () => ({
 		meta: [
@@ -58,8 +68,14 @@ export const Route = createRootRoute({
 				href: "data:,",
 			},
 			{
+				rel: "preload",
+				as: "style",
+				href: appCss,
+			},
+			{
 				rel: "stylesheet",
 				href: appCss,
+				media: "print",
 			},
 			{
 				rel: "alternate",
@@ -98,6 +114,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			<head>
 				<script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
 				<HeadContent />
+				<noscript
+					dangerouslySetInnerHTML={{
+						__html: `<link rel="stylesheet" href="${appCss}" />`,
+					}}
+				/>
+				<script dangerouslySetInnerHTML={{ __html: CSS_DEFER_SCRIPT }} />
 			</head>
 			<body className="flex min-h-screen flex-col font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(79,184,178,0.24)]">
 				<Header />
