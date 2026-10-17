@@ -4,6 +4,8 @@ import {
 	Link,
 	Scripts,
 } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { cyclePalette } from "#/lib/palette";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 
@@ -12,7 +14,7 @@ import appCss from "../styles.css?url";
 const SITE_DESCRIPTION =
 	"Thoughts on code, brewing, and whatever nonsense is rattling around in my head.";
 
-const THEME_INIT_SCRIPT = `(function(){try{var stored=window.localStorage.getItem('theme');var mode=(stored==='light'||stored==='dark'||stored==='auto')?stored:'auto';var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var resolved=mode==='auto'?(prefersDark?'dark':'light'):mode;var root=document.documentElement;root.classList.remove('light','dark');root.classList.add(resolved);if(mode==='auto'){root.removeAttribute('data-theme')}else{root.setAttribute('data-theme',mode)}root.style.colorScheme=resolved;}catch(e){}})();`;
+const THEME_INIT_SCRIPT = `(function(){try{var stored=window.localStorage.getItem('theme');var mode=(stored==='light'||stored==='dark'||stored==='auto')?stored:'auto';var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var resolved=mode==='auto'?(prefersDark?'dark':'light'):mode;var root=document.documentElement;root.classList.remove('light','dark');root.classList.add(resolved);if(mode==='auto'){root.removeAttribute('data-theme')}else{root.setAttribute('data-theme',mode)}root.style.colorScheme=resolved;var params=new URLSearchParams(window.location.search);var urlPalette=params.get('palette');var valid=['default','mono'];var palette;if(urlPalette&&valid.indexOf(urlPalette)!==-1){palette=urlPalette;window.localStorage.setItem('palette',palette)}else{var sp=window.localStorage.getItem('palette');palette=(sp&&valid.indexOf(sp)!==-1)?sp:'default'}if(palette==='default'){root.removeAttribute('data-palette')}else{root.setAttribute('data-palette',palette)}}catch(e){}})();`;
 
 export const Route = createRootRoute({
 	head: () => ({
@@ -103,13 +105,31 @@ function NotFound() {
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+	useEffect(() => {
+		function handleKeyDown(event: KeyboardEvent) {
+			if (event.shiftKey && event.key === "P") {
+				const next = cyclePalette();
+				const url = new URL(window.location.href);
+				if (next === "default") {
+					url.searchParams.delete("palette");
+				} else {
+					url.searchParams.set("palette", next);
+				}
+				window.history.replaceState({}, "", url.toString());
+			}
+		}
+
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, []);
+
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<head>
 				<script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
 				<HeadContent />
 			</head>
-			<body className="flex min-h-screen flex-col font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(79,184,178,0.24)]">
+			<body className="flex min-h-screen flex-col font-sans antialiased [overflow-wrap:anywhere] selection:bg-[var(--selection-bg)]">
 				<Header />
 				{children}
 				<Footer />

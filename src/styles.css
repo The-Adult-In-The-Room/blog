@@ -9,6 +9,7 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* ─── Default palette (teal / ocean-green) ─── */
 :root {
 	--sea-ink: #173a40;
 	--sea-ink-soft: #365559;
@@ -24,6 +25,9 @@
 	--chip-bg: rgba(255, 255, 255, 0.75);
 	--bg-base: #f4f9f6;
 	--header-bg: rgba(255, 255, 255, 0.86);
+	--link-decoration: rgba(34, 112, 119, 0.4);
+	--selection-bg: rgba(79, 184, 178, 0.24);
+	--shadow-accent: rgba(30, 90, 72, 0.08);
 }
 
 :root.dark,
@@ -42,6 +46,9 @@
 	--chip-bg: rgba(16, 30, 34, 0.75);
 	--bg-base: #0a1418;
 	--header-bg: rgba(10, 20, 24, 0.86);
+	--link-decoration: rgba(141, 229, 219, 0.4);
+	--selection-bg: rgba(96, 215, 207, 0.24);
+	--shadow-accent: rgba(96, 215, 207, 0.12);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -60,6 +67,73 @@
 		--chip-bg: rgba(16, 30, 34, 0.75);
 		--bg-base: #0a1418;
 		--header-bg: rgba(10, 20, 24, 0.86);
+		--link-decoration: rgba(141, 229, 219, 0.4);
+		--selection-bg: rgba(96, 215, 207, 0.24);
+		--shadow-accent: rgba(96, 215, 207, 0.12);
+	}
+}
+
+/* ─── Mono palette (grayscale with warm amber accent) ─── */
+:root[data-palette="mono"] {
+	--sea-ink: #1a1a1a;
+	--sea-ink-soft: #525252;
+	--lagoon: #d97706;
+	--lagoon-deep: #b45309;
+	--palm: #78716c;
+	--sand: #fafafa;
+	--foam: #ffffff;
+	--surface: rgba(255, 255, 255, 0.92);
+	--surface-strong: rgba(255, 255, 255, 0.98);
+	--line: rgba(0, 0, 0, 0.10);
+	--chip-line: rgba(0, 0, 0, 0.12);
+	--chip-bg: rgba(255, 255, 255, 0.75);
+	--bg-base: #fafafa;
+	--header-bg: rgba(255, 255, 255, 0.86);
+	--link-decoration: rgba(180, 83, 9, 0.4);
+	--selection-bg: rgba(217, 119, 6, 0.24);
+	--shadow-accent: rgba(0, 0, 0, 0.06);
+}
+
+:root[data-palette="mono"].dark,
+:root[data-palette="mono"][data-theme="dark"] {
+	--sea-ink: #e5e5e5;
+	--sea-ink-soft: #a3a3a3;
+	--lagoon: #fbbf24;
+	--lagoon-deep: #fcd34d;
+	--palm: #a8a29e;
+	--sand: #0a0a0a;
+	--foam: #171717;
+	--surface: rgba(23, 23, 23, 0.92);
+	--surface-strong: rgba(10, 10, 10, 0.96);
+	--line: rgba(255, 255, 255, 0.10);
+	--chip-line: rgba(255, 255, 255, 0.08);
+	--chip-bg: rgba(23, 23, 23, 0.75);
+	--bg-base: #050505;
+	--header-bg: rgba(5, 5, 5, 0.86);
+	--link-decoration: rgba(252, 211, 77, 0.4);
+	--selection-bg: rgba(251, 191, 36, 0.24);
+	--shadow-accent: rgba(251, 191, 36, 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+	:root[data-palette="mono"]:not(.light):not([data-theme="light"]) {
+		--sea-ink: #e5e5e5;
+		--sea-ink-soft: #a3a3a3;
+		--lagoon: #fbbf24;
+		--lagoon-deep: #fcd34d;
+		--palm: #a8a29e;
+		--sand: #0a0a0a;
+		--foam: #171717;
+		--surface: rgba(23, 23, 23, 0.92);
+		--surface-strong: rgba(10, 10, 10, 0.96);
+		--line: rgba(255, 255, 255, 0.10);
+		--chip-line: rgba(255, 255, 255, 0.08);
+		--chip-bg: rgba(23, 23, 23, 0.75);
+		--bg-base: #050505;
+		--header-bg: rgba(5, 5, 5, 0.86);
+		--link-decoration: rgba(252, 211, 77, 0.4);
+		--selection-bg: rgba(251, 191, 36, 0.24);
+		--shadow-accent: rgba(251, 191, 36, 0.08);
 	}
 }
 
@@ -82,7 +156,7 @@ body {
 
 a {
 	color: var(--lagoon-deep);
-	text-decoration-color: rgba(34, 112, 119, 0.4);
+	text-decoration-color: var(--link-decoration);
 	text-decoration-thickness: 1px;
 	text-underline-offset: 2px;
 }
