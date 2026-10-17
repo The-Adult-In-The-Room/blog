@@ -1,0 +1,39 @@
+# Canary (manual): runs ci-workflows reusable workflows against a supplied ref.
+# Triggered manually via workflow_dispatch for bisecting failures.
+# For automated dispatch from ci-workflows PRs, see canary.yml.
+
+name: Canary (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: ci-workflows ref to test (branch, tag, or SHA)
+        required: true
+        type: string
+      targets:
+        description: JSON array of targets to run (e.g. '["verify", "deploy"]')
+        required: true
+        type: string
+
+jobs:
+  # Verify target: runs the verify workflow
+  verify:
+    name: canary-manual / verify
+    if: contains(fromJSON(inputs.targets), 'verify')
+    uses: The-Adult-In-The-Room/ci-workflows/.github/workflows/verify.yml@${{ inputs.ref }}
+    with:
+      run-lighthouse: false
+    secrets: inherit
+
+  # Deploy target: runs deploy-and-smoke against the Railway canary environment
+  deploy:
+    name: canary-manual / deploy
+    if: contains(fromJSON(inputs.targets), 'deploy')
+    uses: The-Adult-In-The-Room/ci-workflows/.github/workflows/deploy-and-smoke.yml@${{ inputs.ref }}
+    with:
+      project: ${{ vars.RAILWAY_CANARY_PROJECT }}
+      service: ${{ vars.RAILWAY_SERVICE }}
+      environment: canary
+    secrets:
+      railway-token: ${{ secrets.RAILWAY_CANARY_TOKEN }}
