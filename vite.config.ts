@@ -55,8 +55,29 @@ const config = defineConfig({
 	},
 	plugins: [
 		nitro({
-			compressPublicAssets: true,
+			compressPublicAssets: {
+				gzip: true,
+				brotli: true,
+			},
 			rollupConfig: { external: [/^@sentry\//] },
+			routeRules: {
+				// Cache prerendered HTML pages aggressively
+				"/": {
+					headers: {
+						"cache-control": "public, max-age=3600, s-maxage=86400",
+					},
+				},
+				"/posts/**": {
+					headers: {
+						"cache-control": "public, max-age=3600, s-maxage=86400",
+					},
+				},
+				"/tags/**": {
+					headers: {
+						"cache-control": "public, max-age=3600, s-maxage=86400",
+					},
+				},
+			},
 		}),
 		tailwindcss(),
 		tanstackStart({

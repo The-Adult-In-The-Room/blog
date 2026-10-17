@@ -11,7 +11,7 @@
   "scripts": {
     "dev": "vite dev --port 3000",
     "generate-routes": "tsr generate",
-    "build": "vite build",
+    "build": "vite build && node scripts/compress-html.mjs",
     "preview": "vite preview --port 3000",
     "test:e2e:acceptance": "playwright test e2e/acceptance",
     "test:e2e:smoke": "playwright test --config=e2e/playwright.smoke.config.ts",
