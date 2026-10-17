@@ -13,7 +13,7 @@ jobs:
   # Verify target: runs the verify workflow
   verify:
     name: canary / verify
-    if: contains(fromJSON(github.event.client_payload.targets), 'verify')
+    if: contains(github.event.client_payload.targets, 'verify')
     uses: The-Adult-In-The-Room/ci-workflows/.github/workflows/verify.yml@canary
     with:
       run-lighthouse: false
@@ -22,7 +22,7 @@ jobs:
   # Deploy target: runs deploy-and-smoke against the Railway canary environment
   deploy:
     name: canary / deploy
-    if: contains(fromJSON(github.event.client_payload.targets), 'deploy')
+    if: contains(github.event.client_payload.targets, 'deploy')
     uses: The-Adult-In-The-Room/ci-workflows/.github/workflows/deploy-and-smoke.yml@canary
     with:
       project: ${{ vars.RAILWAY_CANARY_PROJECT }}
