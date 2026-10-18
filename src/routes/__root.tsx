@@ -1,15 +1,16 @@
+import { TanStackDevtools } from "@tanstack/react-devtools";
 import {
 	createRootRoute,
 	HeadContent,
 	Link,
 	Scripts,
 } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 
 import appCss from "../styles.css?url";
 
+const SITE_URL = "https://its-giving-winning.com";
 const SITE_DESCRIPTION =
 	"Thoughts on code, brewing, and whatever nonsense is rattling around in my head.";
 
@@ -49,8 +50,40 @@ export const Route = createRootRoute({
 				content: SITE_DESCRIPTION,
 			},
 			{
+				property: "og:url",
+				content: SITE_URL,
+			},
+			{
+				property: "og:image",
+				content: `${SITE_URL}/og-image.png`,
+			},
+			{
+				property: "og:image:alt",
+				content: "It's Giving Winning - A blog about code, brewing, and life",
+			},
+			{
 				name: "twitter:card",
-				content: "summary",
+				content: "summary_large_image",
+			},
+			{
+				name: "twitter:url",
+				content: SITE_URL,
+			},
+			{
+				name: "twitter:title",
+				content: "It's Giving Winning",
+			},
+			{
+				name: "twitter:description",
+				content: SITE_DESCRIPTION,
+			},
+			{
+				name: "twitter:image",
+				content: `${SITE_URL}/og-image.png`,
+			},
+			{
+				name: "twitter:image:alt",
+				content: "It's Giving Winning - A blog about code, brewing, and life",
 			},
 		],
 		links: [
@@ -110,14 +143,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
 				<HeadContent />
 			</head>
-			<body className="flex min-h-screen flex-col font-sans antialiased [overflow-wrap:anywhere] selection:bg-[var(--selection-bg)]">
+			<body className="flex min-h-screen flex-col font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(79,184,178,0.24)]">
 				<Header />
 				{children}
 				<Footer />
 				<Scripts />
-				{import.meta.env.DEV && (
-					<TanStackRouterDevtools position="bottom-right" />
-				)}
+				{import.meta.env.DEV && <TanStackDevtools />}
 			</body>
 		</html>
 	);
