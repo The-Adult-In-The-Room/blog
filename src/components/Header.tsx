@@ -7,7 +7,7 @@ export default function Header() {
 			<nav className="page-wrap flex items-center justify-between py-4">
 				<Link
 					to="/"
-					className="text-base font-semibold tracking-tight text-[var(--sea-ink)] no-underline transition hover:text-[var(--lagoon-deep)]"
+					className="text-base font-semibold tracking-tight text-[var(--text-primary)] no-underline transition hover:text-[var(--accent-strong)]"
 				>
 					It's Giving Winning
 				</Link>
