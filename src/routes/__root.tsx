@@ -4,6 +4,7 @@ import {
 	Link,
 	Scripts,
 } from "@tanstack/react-router";
+import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 
@@ -114,6 +115,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				{children}
 				<Footer />
 				<Scripts />
+				{import.meta.env.DEV && (
+					<TanStackRouterDevtools position="bottom-right" />
+				)}
 			</body>
 		</html>
 	);
