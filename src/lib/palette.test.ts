@@ -26,8 +26,8 @@ describe("Given the palette module", () => {
 		});
 
 		test("When a valid palette is stored, Then it returns that palette", () => {
-			window.localStorage.setItem("palette", "mono");
-			expect(getPalette()).toBe("mono");
+			window.localStorage.setItem("palette", "autumn");
+			expect(getPalette()).toBe("autumn");
 		});
 
 		test("When an invalid palette is stored, Then it returns 'default'", () => {
@@ -43,28 +43,28 @@ describe("Given the palette module", () => {
 
 	describe("setPalette", () => {
 		test("When set to 'default', Then it removes the data-palette attribute", () => {
-			document.documentElement.setAttribute("data-palette", "mono");
+			document.documentElement.setAttribute("data-palette", "autumn");
 			setPalette("default");
 			expect(document.documentElement.hasAttribute("data-palette")).toBe(false);
 		});
 
 		test("When set to a named palette, Then it sets the data-palette attribute", () => {
-			setPalette("mono");
+			setPalette("autumn");
 			expect(document.documentElement.getAttribute("data-palette")).toBe(
-				"mono",
+				"autumn",
 			);
 		});
 
 		test("When set, Then it persists the value to localStorage", () => {
-			setPalette("mono");
-			expect(window.localStorage.getItem("palette")).toBe("mono");
+			setPalette("autumn");
+			expect(window.localStorage.getItem("palette")).toBe("autumn");
 		});
 
 		test("When switching palettes, Then it replaces the previous attribute value", () => {
 			setPalette("default");
-			setPalette("mono");
+			setPalette("autumn");
 			expect(document.documentElement.getAttribute("data-palette")).toBe(
-				"mono",
+				"autumn",
 			);
 		});
 	});
@@ -104,9 +104,9 @@ describe("Given the palette module", () => {
 
 		test("When a valid palette param is present, Then it returns that palette", () => {
 			vi.spyOn(window, "location", "get").mockReturnValue({
-				search: "?palette=mono",
+				search: "?palette=autumn",
 			} as Location);
-			expect(getPaletteFromURL()).toBe("mono");
+			expect(getPaletteFromURL()).toBe("autumn");
 		});
 
 		test("When an invalid palette param is present, Then it returns null", () => {

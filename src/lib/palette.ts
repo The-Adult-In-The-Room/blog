@@ -1,13 +1,4 @@
-export const PALETTES = [
-	"default",
-	"mono",
-	"twilight",
-	"pastoral",
-	"forest",
-	"fern",
-	"autumn",
-	"dust",
-] as const;
+export const PALETTES = ["default", "autumn"] as const;
 export type Palette = (typeof PALETTES)[number];
 
 const STORAGE_KEY = "palette";
