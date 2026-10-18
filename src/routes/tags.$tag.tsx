@@ -29,19 +29,19 @@ function TagPage() {
 				<div className="mb-4 flex items-center gap-2 text-sm">
 					<Link
 						to="/"
-						className="text-[var(--sea-ink-soft)] no-underline hover:text-[var(--sea-ink)]"
+						className="text-[var(--text-secondary)] no-underline hover:text-[var(--text-primary)]"
 					>
 						Home
 					</Link>
-					<span className="text-[var(--sea-ink-soft)]">/</span>
+					<span className="text-[var(--text-secondary)]">/</span>
 					<Link
 						to="/tags"
-						className="text-[var(--sea-ink-soft)] no-underline hover:text-[var(--sea-ink)]"
+						className="text-[var(--text-secondary)] no-underline hover:text-[var(--text-primary)]"
 					>
 						Tags
 					</Link>
 				</div>
-				<h1 className="display-title mb-2 text-2xl font-medium tracking-tight text-[var(--sea-ink-soft)] sm:text-3xl">
+				<h1 className="display-title mb-2 text-2xl font-medium tracking-tight text-[var(--text-secondary)] sm:text-3xl">
 					Posts tagged &quot;{tag}&quot;
 				</h1>
 			</section>
@@ -49,7 +49,7 @@ function TagPage() {
 			<section className="space-y-6">
 				{allTags.length > 0 && (
 					<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-						<h2 className="text-sm font-semibold uppercase tracking-wider text-[var(--sea-ink-soft)]">
+						<h2 className="text-sm font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
 							All tags
 						</h2>
 						<nav
@@ -63,8 +63,8 @@ function TagPage() {
 									params={{ tag: t }}
 									className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium transition no-underline ${
 										t === tag
-											? "border-[var(--lagoon-deep)] bg-[var(--surface-strong)] text-[var(--sea-ink)]"
-											: "border-[var(--chip-line)] bg-[var(--chip-bg)] text-[var(--sea-ink-soft)] hover:border-[var(--lagoon-deep)]/40 hover:text-[var(--sea-ink)]"
+											? "border-[var(--accent-strong)] bg-[var(--surface-strong)] text-[var(--text-primary)]"
+											: "border-[var(--chip-line)] bg-[var(--chip-bg)] text-[var(--text-secondary)] hover:border-[var(--accent-strong)]/40 hover:text-[var(--text-primary)]"
 									}`}
 									aria-current={t === tag ? "page" : undefined}
 								>
@@ -76,7 +76,7 @@ function TagPage() {
 				)}
 
 				{posts.length === 0 ? (
-					<p className="text-[var(--sea-ink-soft)]">
+					<p className="text-[var(--text-secondary)]">
 						No posts found with the tag &quot;{tag}&quot;.
 					</p>
 				) : (
@@ -86,21 +86,21 @@ function TagPage() {
 								<Link
 									to="/posts/$slug"
 									params={{ slug: post.slug }}
-									className="group block rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 no-underline transition hover:-translate-y-0.5 hover:border-[var(--lagoon-deep)]/30 hover:bg-[var(--surface-strong)] sm:p-6"
+									className="group block rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 no-underline transition hover:-translate-y-0.5 hover:border-[var(--accent-strong)]/30 hover:bg-[var(--surface-strong)] sm:p-6"
 								>
 									<article>
-										<div className="flex min-w-0 flex-wrap items-center gap-2 text-xs text-[var(--sea-ink-soft)]">
+										<div className="flex min-w-0 flex-wrap items-center gap-2 text-xs text-[var(--text-secondary)]">
 											{Boolean(post.number) && <p>#{post.number}</p>}
 											{post.date ? (
 												<time dateTime={post.date}>{post.date}</time>
 											) : null}
 											<TagList tags={post.tags} asLinks={false} />
 										</div>
-										<h3 className="mt-1 text-xl font-semibold text-[var(--sea-ink)] group-hover:text-[var(--lagoon-deep)]">
+										<h3 className="mt-1 text-xl font-semibold text-[var(--text-primary)] group-hover:text-[var(--accent-strong)]">
 											{post.title}
 										</h3>
 										{Boolean(post.excerpt) && (
-											<p className="mt-2 line-clamp-2 text-sm leading-relaxed text-[var(--sea-ink-soft)]">
+											<p className="mt-2 line-clamp-2 text-sm leading-relaxed text-[var(--text-secondary)]">
 												{post.excerpt}
 											</p>
 										)}

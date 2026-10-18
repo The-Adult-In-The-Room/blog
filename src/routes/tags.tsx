@@ -30,14 +30,14 @@ function TagsPage() {
 	return (
 		<main className="page-wrap px-4 py-12 sm:py-16">
 			<section className="mb-10 max-w-2xl">
-				<h1 className="display-title mb-2 text-2xl font-medium tracking-tight text-[var(--sea-ink-soft)] sm:text-3xl">
+				<h1 className="display-title mb-2 text-2xl font-medium tracking-tight text-[var(--text-secondary)] sm:text-3xl">
 					Tags
 				</h1>
-				<p className="text-[var(--sea-ink-soft)]">Browse posts by topic.</p>
+				<p className="text-[var(--text-secondary)]">Browse posts by topic.</p>
 			</section>
 
 			{tagCounts.length === 0 ? (
-				<p className="text-[var(--sea-ink-soft)]">No tags yet.</p>
+				<p className="text-[var(--text-secondary)]">No tags yet.</p>
 			) : (
 				<nav aria-label="All tags" className="flex flex-wrap gap-2">
 					{tagCounts.map(({ tag, count }) => (
@@ -45,11 +45,11 @@ function TagsPage() {
 							key={tag}
 							to="/tags/$tag"
 							params={{ tag }}
-							className="inline-flex items-center gap-1.5 rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1 text-sm font-medium text-[var(--sea-ink-soft)] no-underline transition hover:border-[var(--lagoon-deep)]/40 hover:text-[var(--sea-ink)]"
+							className="inline-flex items-center gap-1.5 rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1 text-sm font-medium text-[var(--text-secondary)] no-underline transition hover:border-[var(--accent-strong)]/40 hover:text-[var(--text-primary)]"
 						>
 							{tag}
 							<span
-								className="text-xs text-[var(--sea-ink-soft)]/60"
+								className="text-xs text-[var(--text-secondary)]/60"
 								aria-hidden="true"
 							>
 								{count}
