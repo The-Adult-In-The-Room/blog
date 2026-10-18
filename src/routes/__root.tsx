@@ -87,15 +87,15 @@ export const Route = createRootRoute({
 function NotFound() {
 	return (
 		<main className="page-wrap flex flex-grow flex-col items-center justify-center px-4 py-20 text-center">
-			<h1 className="display-title text-4xl font-bold text-[var(--sea-ink)] sm:text-5xl">
+			<h1 className="display-title text-4xl font-bold text-[var(--text-primary)] sm:text-5xl">
 				404
 			</h1>
-			<p className="mt-4 text-lg text-[var(--sea-ink-soft)]">
+			<p className="mt-4 text-lg text-[var(--text-secondary)]">
 				This page doesn't exist.
 			</p>
 			<Link
 				to="/"
-				className="mt-6 inline-flex text-sm font-medium text-[var(--lagoon-deep)] no-underline hover:underline"
+				className="mt-6 inline-flex text-sm font-medium text-[var(--accent-strong)] no-underline hover:underline"
 			>
 				← Back home
 			</Link>
@@ -110,7 +110,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
 				<HeadContent />
 			</head>
-			<body className="flex min-h-screen flex-col font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(79,184,178,0.24)]">
+			<body className="flex min-h-screen flex-col font-sans antialiased [overflow-wrap:anywhere] selection:bg-[var(--selection-bg)]">
 				<Header />
 				{children}
 				<Footer />

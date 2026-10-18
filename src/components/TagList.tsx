@@ -13,7 +13,7 @@ export default function TagList({
 		<div className="flex min-w-0 flex-wrap items-center gap-1.5">
 			{tags.map((tag) => {
 				const className =
-					"inline-flex rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-2.5 py-0.5 text-xs font-medium text-[var(--sea-ink-soft)] transition hover:border-[var(--lagoon-deep)]/40 hover:text-[var(--sea-ink)]";
+					"inline-flex rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-2.5 py-0.5 text-xs font-medium text-[var(--text-secondary)] transition hover:border-[var(--accent-strong)]/40 hover:text-[var(--text-primary)]";
 
 				return asLinks ? (
 					<Link

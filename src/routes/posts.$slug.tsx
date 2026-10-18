@@ -42,13 +42,13 @@ function PostPage() {
 		<article className="page-wrap px-4 py-10 sm:py-14">
 			<Link
 				to="/"
-				className="mb-6 inline-flex text-sm font-medium text-[var(--sea-ink-soft)] no-underline hover:text-[var(--sea-ink)]"
+				className="mb-6 inline-flex text-sm font-medium text-[var(--text-secondary)] no-underline hover:text-[var(--text-primary)]"
 			>
 				← Back home
 			</Link>
 
 			<header className="mb-10 max-w-3xl">
-				<div className="flex flex-wrap items-center gap-3 text-sm text-[var(--sea-ink-soft)]">
+				<div className="flex flex-wrap items-center gap-3 text-sm text-[var(--text-secondary)]">
 					{post.number ? (
 						<span className="font-medium">#{post.number}</span>
 					) : null}
@@ -59,7 +59,7 @@ function PostPage() {
 					) : null}
 					<TagList tags={post.tags} />
 				</div>
-				<h1 className="display-title mt-3 text-3xl font-bold tracking-tight text-[var(--sea-ink)] sm:text-4xl">
+				<h1 className="display-title mt-3 text-3xl font-bold tracking-tight text-[var(--text-primary)] sm:text-4xl">
 					{post.title}
 				</h1>
 			</header>
