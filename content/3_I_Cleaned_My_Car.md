@@ -2,7 +2,6 @@
 title: I cleaned my car
 date: 2026-10-17
 excerpt: Ray cleans his car and has an epiphany.
-draft: true
 tags:
   - life
 ---
