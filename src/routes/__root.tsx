@@ -5,6 +5,7 @@ import {
 	Link,
 	Scripts,
 } from "@tanstack/react-router";
+import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 
@@ -148,7 +149,14 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				{children}
 				<Footer />
 				<Scripts />
-				{import.meta.env.DEV && <TanStackDevtools />}
+				<TanStackDevtools
+					plugins={[
+						{
+							name: "TanStack Router",
+							render: <TanStackRouterDevtoolsPanel />,
+						},
+					]}
+				/>
 			</body>
 		</html>
 	);

@@ -1,3 +1,4 @@
+import { Markdown } from "@tanstack/markdown/react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import TagList from "../components/TagList";
 import { getPost } from "../lib/posts";
@@ -63,11 +64,9 @@ function PostPage() {
 					{post.title}
 				</h1>
 			</header>
-
-			<div
-				className="prose prose-lg max-w-3xl dark:prose-invert"
-				dangerouslySetInnerHTML={{ __html: post.content }}
-			/>
+			<div className="prose prose-lg max-w-3xl dark:prose-invert">
+				<Markdown>{post.content}</Markdown>
+			</div>
 		</article>
 	);
 }

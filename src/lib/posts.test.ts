@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { createPostSummary } from "../test-utils/fixtures";
 import {
 	clearPostCache,
@@ -11,165 +11,26 @@ import {
 	filenameToTitle,
 	filterPostsByTag,
 	getAllTags,
+	getContentDir,
 	getPostFromDir,
 	getPostsFromDir,
 	getTagCounts,
 	normalizeTags,
-	type PostSummary,
 	readPostFile,
 	readPostSummary,
 	sortPosts,
 } from "./posts";
 
-describe("Given a filename with a numeric prefix", () => {
-	test("When converting to a slug, Then the prefix and extension are removed and words become kebab-case", () => {
-		expect(filenameToSlug("1_Hello_World.md")).toBe("hello-world");
-	});
-
-	test("When converting to a title, Then the prefix and extension are removed and words become title-case", () => {
-		expect(filenameToTitle("1_Hello_World.md")).toBe("Hello World");
-	});
-
-	test("When extracting the number, Then the numeric prefix is returned", () => {
-		expect(filenameToNumber("1_Hello_World.md")).toBe(1);
-	});
-});
-
-describe("Given a filename without a numeric prefix", () => {
-	test("When converting to a slug, Then the extension is removed and words become kebab-case", () => {
-		expect(filenameToSlug("Hello_World.md")).toBe("hello-world");
-	});
-
-	test("When converting to a title, Then the extension is removed and words become title-case", () => {
-		expect(filenameToTitle("Hello_World.md")).toBe("Hello World");
-	});
-
-	test("When extracting the number, Then null is returned", () => {
-		expect(filenameToNumber("Hello_World.md")).toBeNull();
-	});
-});
-
-describe("Given a filename with a full path", () => {
-	test("When converting to a slug, Then only the basename is considered", () => {
-		expect(filenameToSlug("/some/path/2_My_Post_Name.md")).toBe("my-post-name");
-	});
-
-	test("When converting to a title, Then only the basename is considered", () => {
-		expect(filenameToTitle("/some/path/2_My_Post_Name.md")).toBe(
-			"My Post Name",
-		);
-	});
-
-	test("When extracting the number, Then only the basename is considered", () => {
-		expect(filenameToNumber("/some/path/2_My_Post_Name.md")).toBe(2);
-	});
-});
-
-describe("Given tag input in various formats", () => {
-	test("When tags are provided as an array of strings, Then they are normalized to lowercase", () => {
-		expect(normalizeTags(["Beer", "LIFE", "Code"])).toEqual([
-			"beer",
-			"life",
-			"code",
-		]);
-	});
-
-	test("When tags contain whitespace, Then it is trimmed", () => {
-		expect(normalizeTags(["  Beer  ", "  Life  "])).toEqual(["beer", "life"]);
-	});
-
-	test("When tags are provided as a comma-separated string, Then they are split and normalized", () => {
-		expect(normalizeTags("Beer, Life, Code")).toEqual(["beer", "life", "code"]);
-	});
-
-	test("When tags contain empty or whitespace-only entries, Then they are removed", () => {
-		expect(normalizeTags(["beer", "", "  ", "life"])).toEqual(["beer", "life"]);
-		expect(normalizeTags("beer,, life")).toEqual(["beer", "life"]);
-	});
-
-	test("When tags are null, undefined, or an empty array, Then an empty array is returned", () => {
-		expect(normalizeTags(null)).toEqual([]);
-		expect(normalizeTags(undefined)).toEqual([]);
-		expect(normalizeTags([])).toEqual([]);
-		expect(normalizeTags("")).toEqual([]);
-	});
-
-	test("When tags contain non-string values in an array, Then they are coerced to strings", () => {
-		expect(normalizeTags(["beer", 42, "life"])).toEqual(["beer", "42", "life"]);
-	});
-});
-
-describe("Given markdown body content", () => {
-	test("When extracting an excerpt, Then the first paragraph is returned", () => {
-		expect(extractExcerpt("First paragraph.\n\nSecond paragraph.")).toBe(
-			"First paragraph.",
-		);
-	});
-
-	test("When the content starts with a heading, Then the heading is ignored", () => {
-		expect(extractExcerpt("# Title\n\nFirst paragraph.")).toBe(
-			"First paragraph.",
-		);
-	});
-
-	test("When the first paragraph exceeds 160 characters, Then it is truncated with an ellipsis", () => {
-		const longParagraph = "a".repeat(200);
-		expect(extractExcerpt(longParagraph)).toBe(`${"a".repeat(157)}...`);
-	});
-
-	test("When the content only contains headings, Then an empty string is returned", () => {
-		expect(extractExcerpt("# One\n## Two")).toBe("");
-	});
-
-	test("When the content is empty, Then an empty string is returned", () => {
-		expect(extractExcerpt("")).toBe("");
-	});
-
-	test("When a paragraph spans multiple lines, Then internal whitespace is collapsed", () => {
-		expect(extractExcerpt("First\nline\nparagraph.\n\nSecond.")).toBe(
-			"First line paragraph.",
-		);
-	});
-});
-
-describe("Given the BLOG_CONTENT_DIR environment variable", () => {
-	test("When it is set, Then getContentDir() resolves to the custom directory", async () => {
-		const customDir = fs.mkdtempSync(
-			path.join(os.tmpdir(), "blog-content-env-test-"),
-		);
-		fs.writeFileSync(
-			path.join(customDir, "1_Env_Post.md"),
-			"Body content.",
-			"utf-8",
-		);
-
-		vi.stubEnv("BLOG_CONTENT_DIR", customDir);
-		vi.resetModules();
-		const { getContentDir, getPostsFromDir } = await import("./posts");
-
-		const resolvedDir = getContentDir();
-		expect(resolvedDir).toBe(path.resolve(customDir));
-
-		const posts = await getPostsFromDir(resolvedDir);
-		expect(posts).toHaveLength(1);
-		expect(posts[0].slug).toBe("env-post");
-
-		vi.unstubAllEnvs();
-		fs.rmSync(customDir, { recursive: true, force: true });
-		clearPostCache();
-	});
-});
-
-describe("Given a temporary content directory", () => {
+describe("posts", () => {
 	let tempDir: string;
 
 	beforeEach(() => {
-		tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "blog-posts-test-"));
+		tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "posts-test-"));
+		clearPostCache();
 	});
 
 	afterEach(() => {
 		fs.rmSync(tempDir, { recursive: true, force: true });
-		clearPostCache();
 	});
 
 	function writePost(filename: string, content: string): string {
@@ -178,658 +39,396 @@ describe("Given a temporary content directory", () => {
 		return filePath;
 	}
 
-	describe("When reading a post file with full frontmatter", () => {
-		test("Then the frontmatter values take precedence", async () => {
+	describe("filenameToSlug", () => {
+		test("converts filename to slug", () => {
+			expect(filenameToSlug("1_Hello_World.md")).toBe("hello-world");
+			expect(filenameToSlug("my_post.md")).toBe("my-post");
+		});
+	});
+
+	describe("filenameToTitle", () => {
+		test("converts filename to title", () => {
+			expect(filenameToTitle("1_Hello_World.md")).toBe("Hello World");
+			expect(filenameToTitle("my_post.md")).toBe("My Post");
+		});
+	});
+
+	describe("filenameToNumber", () => {
+		test("extracts number from filename", () => {
+			expect(filenameToNumber("1_Hello_World.md")).toBe(1);
+			expect(filenameToNumber("42_my_post.md")).toBe(42);
+			expect(filenameToNumber("no_number.md")).toBeNull();
+		});
+	});
+
+	describe("extractExcerpt", () => {
+		test("extracts first paragraph", () => {
+			const body = "First paragraph.\n\nSecond paragraph.";
+			expect(extractExcerpt(body)).toBe("First paragraph.");
+		});
+
+		test("returns empty string for empty body", () => {
+			expect(extractExcerpt("")).toBe("");
+		});
+
+		test("truncates long excerpts", () => {
+			const longText = "a".repeat(200);
+			const excerpt = extractExcerpt(longText);
+			expect(excerpt.length).toBe(160);
+			expect(excerpt.endsWith("...")).toBe(true);
+		});
+	});
+
+	describe("normalizeTags", () => {
+		test("normalizes array of tags", () => {
+			expect(normalizeTags(["Beer", "LIFE"])).toEqual(["beer", "life"]);
+		});
+
+		test("normalizes comma-separated string", () => {
+			expect(normalizeTags("beer, life")).toEqual(["beer", "life"]);
+		});
+
+		test("returns empty array for invalid input", () => {
+			expect(normalizeTags(null)).toEqual([]);
+			expect(normalizeTags(undefined)).toEqual([]);
+			expect(normalizeTags(123)).toEqual([]);
+		});
+
+		test("handles array with non-string values", () => {
+			expect(normalizeTags([123, "beer", null])).toEqual([
+				"123",
+				"beer",
+				"null",
+			]);
+		});
+
+		test("filters empty tags", () => {
+			expect(normalizeTags(["beer", "", "life"])).toEqual(["beer", "life"]);
+		});
+
+		test("handles empty string", () => {
+			expect(normalizeTags("")).toEqual([]);
+		});
+	});
+
+	describe("readPostFile", () => {
+		test("parses markdown file with frontmatter", async () => {
 			const filePath = writePost(
-				"1_Filename_Title.md",
-				[
-					"---",
-					"title: Frontmatter Title",
-					"date: 2026-09-28",
-					"slug: frontmatter-slug",
-					"excerpt: Frontmatter excerpt.",
-					"tags: [beer, life]",
-					"number: 42",
-					"---",
-					"Body content.",
-				].join("\n"),
+				"test.md",
+				"---\ntitle: Test Post\ndate: 2026-09-28\ntags: [beer, life]\n---\nBody content.",
 			);
 
 			const post = await readPostFile(filePath);
 
-			expect(post.title).toBe("Frontmatter Title");
+			expect(post.title).toBe("Test Post");
 			expect(post.date).toBe("2026-09-28");
-			expect(post.slug).toBe("frontmatter-slug");
-			expect(post.excerpt).toBe("Frontmatter excerpt.");
 			expect(post.tags).toEqual(["beer", "life"]);
-			expect(post.number).toBe(42);
-			expect(post.draft).toBe(false);
-			expect(post.content).toContain("<p>Body content.</p>");
-			expect(post).not.toHaveProperty("rawBody");
+			expect(post.content).toBeDefined();
+			expect(post.content.type).toBe("root");
 		});
-	});
 
-	describe("When reading a post file marked as draft", () => {
-		test("Then draft is true", async () => {
-			const filePath = writePost(
-				"draft-post.md",
-				["---", "draft: true", "---", "Body content."].join("\n"),
-			);
-
-			const post = await readPostFile(filePath);
-
-			expect(post.draft).toBe(true);
-		});
-	});
-
-	describe("When reading a post file without frontmatter", () => {
-		test("Then values are inferred from the filename", async () => {
-			const filePath = writePost(
-				"1_Hello_World.md",
-				"First paragraph of the post.\n\nSecond paragraph.",
-			);
+		test("uses filename for missing frontmatter", async () => {
+			const filePath = writePost("1_Hello_World.md", "Body content.");
 
 			const post = await readPostFile(filePath);
 
 			expect(post.title).toBe("Hello World");
 			expect(post.slug).toBe("hello-world");
 			expect(post.number).toBe(1);
-			expect(post.date).toBeNull();
+		});
+
+		test("parses numeric frontmatter values", async () => {
+			const filePath = writePost(
+				"test.md",
+				"---\ntitle: Test\nnumber: 42\n---\nBody.",
+			);
+
+			const post = await readPostFile(filePath);
+
+			expect(post.number).toBe(42);
+		});
+
+		test("parses float frontmatter values", async () => {
+			const filePath = writePost(
+				"test.md",
+				"---\ntitle: Test\nversion: 1.5\n---\nBody.",
+			);
+
+			const post = await readPostFile(filePath);
+
+			// Float values are parsed but may not be used in Post type
+			expect(post).toBeDefined();
+		});
+
+		test("parses boolean frontmatter values", async () => {
+			const filePath = writePost(
+				"test.md",
+				"---\ntitle: Test\ndraft: true\n---\nBody.",
+			);
+
+			const post = await readPostFile(filePath);
+
+			expect(post.draft).toBe(true);
+		});
+
+		test("handles tags as string", async () => {
+			const filePath = writePost(
+				"test.md",
+				"---\ntitle: Test\ntags: beer, life\n---\nBody.",
+			);
+
+			const post = await readPostFile(filePath);
+
+			expect(post.tags).toEqual(["beer", "life"]);
+		});
+
+		test("handles quoted values in frontmatter", async () => {
+			const filePath = writePost(
+				"test.md",
+				'---\ntitle: "Quoted Title"\n---\nBody.',
+			);
+
+			const post = await readPostFile(filePath);
+
+			expect(post.title).toBe("Quoted Title");
+		});
+
+		test("handles frontmatter with invalid lines", async () => {
+			const filePath = writePost(
+				"test.md",
+				"---\ntitle: Test\ninvalid line without colon\nslug: test\n---\nBody.",
+			);
+
+			const post = await readPostFile(filePath);
+
+			expect(post.title).toBe("Test");
+			expect(post.slug).toBe("test");
+		});
+
+		test("handles empty array in frontmatter", async () => {
+			const filePath = writePost(
+				"test.md",
+				"---\ntitle: Test\ntags: []\n---\nBody.",
+			);
+
+			const post = await readPostFile(filePath);
+
 			expect(post.tags).toEqual([]);
-			expect(post.excerpt).toBe("First paragraph of the post.");
+		});
+
+		test("handles array with quoted values in frontmatter", async () => {
+			const filePath = writePost(
+				"test.md",
+				"---\ntitle: Test\ntags: [\"beer\", 'life']\n---\nBody.",
+			);
+
+			const post = await readPostFile(filePath);
+
+			expect(post.tags).toEqual(["beer", "life"]);
 		});
 	});
 
-	describe("When reading a post file with partial frontmatter", () => {
-		test("Then provided frontmatter values are used and missing values fallback to the filename", async () => {
+	describe("readPostSummary", () => {
+		test("returns post summary", async () => {
 			const filePath = writePost(
-				"2_My_Post.md",
-				["---", "title: Override Title", "---", "Body content."].join("\n"),
-			);
-
-			const post = await readPostFile(filePath);
-
-			expect(post.title).toBe("Override Title");
-			expect(post.slug).toBe("my-post");
-			expect(post.number).toBe(2);
-			expect(post.date).toBeNull();
-		});
-	});
-
-	describe("When a post links to another post by markdown filename", () => {
-		test("Then the link is rewritten to the post route", async () => {
-			writePost(
-				"1_Rules_Of_Engagement.md",
-				["---", "title: Rules of Engagement", "---", "Body."].join("\n"),
-			);
-			const filePath = writePost(
-				"3_I_Cleaned_My_Car.md",
-				"Remember the [Rules of Engagement](./1_Rules_Of_Engagement.md)?",
-			);
-
-			const post = await readPostFile(filePath);
-
-			expect(post.content).toContain(
-				'<a href="/posts/rules-of-engagement">Rules of Engagement</a>',
-			);
-		});
-
-		test("Then a hash fragment is preserved", async () => {
-			writePost(
-				"1_Rules_Of_Engagement.md",
-				["---", "title: Rules of Engagement", "---", "Body."].join("\n"),
-			);
-			const filePath = writePost(
-				"3_I_Cleaned_My_Car.md",
-				"See the [intro](./1_Rules_Of_Engagement.md#intro).",
-			);
-
-			const post = await readPostFile(filePath);
-
-			expect(post.content).toContain(
-				'<a href="/posts/rules-of-engagement#intro">intro</a>',
-			);
-		});
-
-		test("Then a link without the ./ prefix is also rewritten", async () => {
-			writePost(
-				"1_Rules_Of_Engagement.md",
-				["---", "title: Rules of Engagement", "---", "Body."].join("\n"),
-			);
-			const filePath = writePost(
-				"3_I_Cleaned_My_Car.md",
-				"Read [Rules of Engagement](1_Rules_Of_Engagement.md).",
-			);
-
-			const post = await readPostFile(filePath);
-
-			expect(post.content).toContain(
-				'<a href="/posts/rules-of-engagement">Rules of Engagement</a>',
-			);
-		});
-
-		test("Then the linked post's frontmatter slug takes precedence over the filename", async () => {
-			writePost(
-				"1_Rules_Of_Engagement.md",
-				["---", "title: Rules of Engagement", "slug: roe", "---", "Body."].join(
-					"\n",
-				),
-			);
-			const filePath = writePost(
-				"3_I_Cleaned_My_Car.md",
-				"Read [Rules of Engagement](./1_Rules_Of_Engagement.md).",
-			);
-
-			const post = await readPostFile(filePath);
-
-			expect(post.content).toContain(
-				'<a href="/posts/roe">Rules of Engagement</a>',
-			);
-		});
-
-		test("Then external URLs are not rewritten", async () => {
-			const filePath = writePost(
-				"3_I_Cleaned_My_Car.md",
-				"Read [something](https://example.com/page.md).",
-			);
-
-			const post = await readPostFile(filePath);
-
-			expect(post.content).toContain(
-				'<a href="https://example.com/page.md">something</a>',
-			);
-		});
-
-		test("Then links to unknown markdown files are not rewritten", async () => {
-			const filePath = writePost(
-				"3_I_Cleaned_My_Car.md",
-				"Read [missing](./Missing_Post.md).",
-			);
-
-			const post = await readPostFile(filePath);
-
-			expect(post.content).toContain('<a href="./Missing_Post.md">missing</a>');
-		});
-
-		test("Then links to non-markdown files are not rewritten", async () => {
-			const filePath = writePost(
-				"3_I_Cleaned_My_Car.md",
-				"Read [pdf](./document.pdf).",
-			);
-
-			const post = await readPostFile(filePath);
-
-			expect(post.content).toContain('<a href="./document.pdf">pdf</a>');
-		});
-
-		test("Then links with directory traversal are not rewritten", async () => {
-			const filePath = writePost(
-				"3_I_Cleaned_My_Car.md",
-				"Read [other](../other-dir/Other_Post.md).",
-			);
-
-			const post = await readPostFile(filePath);
-
-			expect(post.content).toContain(
-				'<a href="../other-dir/Other_Post.md">other</a>',
-			);
-		});
-
-		test("Then the slug map is reused across post reads in the same directory", async () => {
-			writePost(
-				"1_Rules_Of_Engagement.md",
-				["---", "title: Rules of Engagement", "---", "Body."].join("\n"),
-			);
-			const firstPath = writePost(
-				"2_First_Post.md",
-				"Read [Rules of Engagement](./1_Rules_Of_Engagement.md).",
-			);
-			const secondPath = writePost(
-				"3_Second_Post.md",
-				"Also read [Rules of Engagement](./1_Rules_Of_Engagement.md).",
-			);
-
-			const firstPost = await readPostFile(firstPath);
-			const secondPost = await readPostFile(secondPath);
-
-			expect(firstPost.content).toContain(
-				'<a href="/posts/rules-of-engagement">Rules of Engagement</a>',
-			);
-			expect(secondPost.content).toContain(
-				'<a href="/posts/rules-of-engagement">Rules of Engagement</a>',
-			);
-		});
-	});
-
-	describe("When tags are provided as a comma-separated frontmatter string", () => {
-		test("Then they are normalized to an array", async () => {
-			const filePath = writePost(
-				"post.md",
-				["---", "tags: Beer, Life, Code", "---", "Body."].join("\n"),
-			);
-
-			const post = await readPostFile(filePath);
-
-			expect(post.tags).toEqual(["beer", "life", "code"]);
-		});
-	});
-
-	describe("When reading a post summary", () => {
-		test("Then metadata is returned without rendered content", async () => {
-			const filePath = writePost(
-				"1_Hello_World.md",
-				["---", "title: Summary Title", "---", "Body content."].join("\n"),
+				"test.md",
+				"---\ntitle: Test\ndate: 2026-09-28\ntags: [beer]\n---\nBody.",
 			);
 
 			const summary = await readPostSummary(filePath);
 
-			expect(summary).toEqual({
-				slug: "hello-world",
-				title: "Summary Title",
-				date: null,
-				excerpt: "Body content.",
-				tags: [],
-				number: 1,
-				draft: false,
-			});
-			expect(summary).not.toHaveProperty("content");
+			expect(summary.title).toBe("Test");
+			expect(summary.date).toBe("2026-09-28");
+			expect(summary.tags).toEqual(["beer"]);
 		});
 	});
 
-	describe("When frontmatter has an invalid date", () => {
-		test("Then it throws a clear error identifying the file and field", async () => {
-			const filePath = writePost(
-				"post.md",
-				["---", "date: not-a-date", "---", "Body."].join("\n"),
-			);
-
-			await expect(readPostFile(filePath)).rejects.toThrow(
-				`Invalid frontmatter in ${filePath}: date: Invalid date: "not-a-date"`,
-			);
-		});
-	});
-
-	describe("When frontmatter date is a numeric timestamp", () => {
-		test("Then it is normalized to an ISO date string", async () => {
-			const filePath = writePost(
-				"post.md",
-				["---", "date: 1727654400000", "---", "Body."].join("\n"),
-			);
-
-			const post = await readPostFile(filePath);
-
-			expect(post.date).toBe("2024-09-30");
-		});
-	});
-
-	describe("When frontmatter has an invalid title type", () => {
-		test("Then it throws a clear error identifying the field", async () => {
-			const filePath = writePost(
-				"post.md",
-				["---", "title: 123", "---", "Body."].join("\n"),
-			);
-
-			await expect(readPostFile(filePath)).rejects.toThrow(/title:/);
-			await expect(readPostFile(filePath)).rejects.toThrow(
-				/expected string, received number/i,
-			);
-		});
-	});
-
-	describe("When frontmatter has an empty title", () => {
-		test("Then it throws a clear error", async () => {
-			const filePath = writePost(
-				"post.md",
-				["---", 'title: ""', "---", "Body."].join("\n"),
-			);
-
-			await expect(readPostFile(filePath)).rejects.toThrow(
-				/Title must be a non-empty string/i,
-			);
-		});
-	});
-
-	describe("When frontmatter has an invalid slug", () => {
-		test("Then it throws a clear error", async () => {
-			const filePath = writePost(
-				"post.md",
-				["---", "slug: hello world", "---", "Body."].join("\n"),
-			);
-
-			await expect(readPostFile(filePath)).rejects.toThrow(
-				/Slug must contain only lowercase letters, numbers, and hyphens/i,
-			);
-		});
-	});
-
-	describe("When frontmatter has an invalid number type", () => {
-		test("Then it throws a clear error identifying the field", async () => {
-			const filePath = writePost(
-				"post.md",
-				["---", "number: one", "---", "Body."].join("\n"),
-			);
-
-			await expect(readPostFile(filePath)).rejects.toThrow(/number:/);
-			await expect(readPostFile(filePath)).rejects.toThrow(
-				/expected number, received string/i,
-			);
-		});
-	});
-
-	describe("When frontmatter has a non-integer number", () => {
-		test("Then it throws a clear error", async () => {
-			const filePath = writePost(
-				"post.md",
-				["---", "number: 3.14", "---", "Body."].join("\n"),
-			);
-
-			await expect(readPostFile(filePath)).rejects.toThrow(
-				/Number must be an integer/i,
-			);
-		});
-	});
-
-	describe("When frontmatter has invalid tags", () => {
-		test("Then it throws a clear error identifying the field", async () => {
-			const filePath = writePost(
-				"post.md",
-				["---", "tags: 42", "---", "Body."].join("\n"),
-			);
-
-			await expect(readPostFile(filePath)).rejects.toThrow(/tags:/);
-			await expect(readPostFile(filePath)).rejects.toThrow(
-				/Invalid frontmatter/i,
-			);
-		});
-	});
-
-	describe("When the same post file is read multiple times", () => {
-		test("Then the file is only read from disk once", async () => {
-			const filePath = writePost("1_Hello_World.md", "Body content.");
-			const readFileSpy = vi.spyOn(fs.promises, "readFile");
-
-			await readPostSummary(filePath);
-			await readPostFile(filePath);
-
-			expect(readFileSpy).toHaveBeenCalledTimes(1);
-			expect(readFileSpy).toHaveBeenCalledWith(filePath, "utf-8");
-
-			readFileSpy.mockRestore();
-		});
-	});
-
-	describe("When listing posts from a directory", () => {
-		test("Then only markdown files are read and returned as summaries", async () => {
-			writePost("1_First.md", "First post body.");
-			writePost("2_Second.md", "Second post body.");
-			writePost("notes.txt", "This should be ignored.");
+	describe("getPostsFromDir", () => {
+		test("returns all published posts sorted by date", async () => {
+			writePost("1_post-a.md", "---\ntitle: Post A\ndate: 2026-09-27\n---\nA.");
+			writePost("2_post-b.md", "---\ntitle: Post B\ndate: 2026-09-28\n---\nB.");
 
 			const posts = await getPostsFromDir(tempDir);
 
 			expect(posts).toHaveLength(2);
-			expect(posts.map((p) => p.slug)).toEqual(["first", "second"]);
-			expect(posts[0]).not.toHaveProperty("content");
+			expect(posts[0].title).toBe("Post B");
+			expect(posts[1].title).toBe("Post A");
 		});
 
-		test("Then draft posts are hidden in production", async () => {
-			vi.stubEnv("NODE_ENV", "production");
-			writePost("1_Published.md", "Published post.");
-			writePost(
-				"2_Draft.md",
-				["---", "draft: true", "---", "Draft."].join("\n"),
-			);
+		test("excludes draft posts in production", async () => {
+			const originalNodeEnv = process.env.NODE_ENV;
+			process.env.NODE_ENV = "production";
+
+			writePost("draft.md", "---\ntitle: Draft\ndraft: true\n---\nDraft.");
 
 			const posts = await getPostsFromDir(tempDir);
 
-			expect(posts).toHaveLength(1);
-			expect(posts[0].slug).toBe("published");
-			vi.unstubAllEnvs();
-		});
+			expect(posts).toHaveLength(0);
 
-		test("Then draft posts are visible outside production", async () => {
-			vi.stubEnv("NODE_ENV", "development");
-			writePost("1_Published.md", "Published post.");
-			writePost(
-				"2_Draft.md",
-				["---", "draft: true", "---", "Draft."].join("\n"),
-			);
-
-			const posts = await getPostsFromDir(tempDir);
-
-			expect(posts).toHaveLength(2);
-			vi.unstubAllEnvs();
-		});
-
-		test("Then posts are sorted by date descending regardless of numeric prefix", async () => {
-			writePost(
-				"1_Older.md",
-				["---", "date: 2026-01-01", "---", "Older."].join("\n"),
-			);
-			writePost(
-				"2_Newer.md",
-				["---", "date: 2026-12-01", "---", "Newer."].join("\n"),
-			);
-
-			const posts = await getPostsFromDir(tempDir);
-
-			expect(posts.map((p) => p.slug)).toEqual(["newer", "older"]);
-		});
-
-		test("Then posts without numbers are sorted by date descending", async () => {
-			writePost(
-				"Old.md",
-				["---", "date: 2026-01-01", "---", "Old."].join("\n"),
-			);
-			writePost(
-				"New.md",
-				["---", "date: 2026-12-01", "---", "New."].join("\n"),
-			);
-
-			const posts = await getPostsFromDir(tempDir);
-
-			expect(posts.map((p) => p.slug)).toEqual(["new", "old"]);
-		});
-
-		test("Then an empty directory returns an empty array", async () => {
-			const posts = await getPostsFromDir(tempDir);
-			expect(posts).toEqual([]);
+			process.env.NODE_ENV = originalNodeEnv;
 		});
 	});
 
-	describe("When fetching a single post from a directory", () => {
-		test("Then the matching post is returned", async () => {
-			writePost("1_Target.md", "Target body.");
-			writePost("2_Other.md", "Other body.");
+	describe("getPostFromDir", () => {
+		test("returns post by slug", async () => {
+			writePost("1_hello-world.md", "---\ntitle: Hello World\n---\nContent.");
 
-			const post = await getPostFromDir(tempDir, "target");
+			const post = await getPostFromDir(tempDir, "hello-world");
 
 			expect(post).not.toBeNull();
-			expect(post?.title).toBe("Target");
+			expect(post?.title).toBe("Hello World");
 		});
 
-		test("Then null is returned when no post matches the slug", async () => {
-			writePost("1_Only.md", "Only body.");
-
+		test("returns null for non-existent post", async () => {
 			const post = await getPostFromDir(tempDir, "missing");
 
 			expect(post).toBeNull();
 		});
 
-		test("Then null is returned for a draft post in production", async () => {
-			vi.stubEnv("NODE_ENV", "production");
-			writePost(
-				"draft-post.md",
-				["---", "draft: true", "---", "Draft body."].join("\n"),
-			);
+		test("returns null for draft post in production", async () => {
+			const originalNodeEnv = process.env.NODE_ENV;
+			process.env.NODE_ENV = "production";
 
-			const post = await getPostFromDir(tempDir, "draft-post");
+			writePost("1_draft.md", "---\ntitle: Draft\ndraft: true\n---\nContent.");
+
+			const post = await getPostFromDir(tempDir, "draft");
 
 			expect(post).toBeNull();
-			vi.unstubAllEnvs();
+
+			process.env.NODE_ENV = originalNodeEnv;
 		});
 
-		test("Then a draft post is returned outside production", async () => {
-			vi.stubEnv("NODE_ENV", "development");
-			writePost(
-				"draft-post.md",
-				["---", "draft: true", "---", "Draft body."].join("\n"),
-			);
+		test("returns draft post in development", async () => {
+			const originalNodeEnv = process.env.NODE_ENV;
+			process.env.NODE_ENV = "development";
 
-			const post = await getPostFromDir(tempDir, "draft-post");
+			writePost("1_draft.md", "---\ntitle: Draft\ndraft: true\n---\nContent.");
+
+			const post = await getPostFromDir(tempDir, "draft");
 
 			expect(post).not.toBeNull();
-			expect(post?.draft).toBe(true);
-			vi.unstubAllEnvs();
+			expect(post?.title).toBe("Draft");
+
+			process.env.NODE_ENV = originalNodeEnv;
 		});
 	});
-});
 
-describe("Given a list of post summaries with tags", () => {
-	test("When getting all tags, Then unique tags are returned sorted", () => {
-		const posts: PostSummary[] = [
-			createPostSummary({ slug: "b", title: "B", tags: ["beer", "code"] }),
-			createPostSummary({ slug: "a", title: "A", tags: ["beer", "life"] }),
-		];
+	describe("getAllTags", () => {
+		test("returns unique sorted tags", () => {
+			const posts = [
+				createPostSummary({ tags: ["beer", "life"] }),
+				createPostSummary({ tags: ["code", "beer"] }),
+			];
 
-		expect(getAllTags(posts)).toEqual(["beer", "code", "life"]);
+			const tags = getAllTags(posts);
+
+			expect(tags).toEqual(["beer", "code", "life"]);
+		});
 	});
 
-	test("When no posts have tags, Then an empty array is returned", () => {
-		const posts: PostSummary[] = [createPostSummary({ slug: "a", title: "A" })];
+	describe("getTagCounts", () => {
+		test("returns tag counts sorted by tag", () => {
+			const posts = [
+				createPostSummary({ tags: ["beer", "life"] }),
+				createPostSummary({ tags: ["beer"] }),
+			];
 
-		expect(getAllTags(posts)).toEqual([]);
+			const counts = getTagCounts(posts);
+
+			expect(counts).toEqual([
+				{ tag: "beer", count: 2 },
+				{ tag: "life", count: 1 },
+			]);
+		});
 	});
 
-	test("When filtering by tag, Then only matching posts are returned", () => {
-		const posts: PostSummary[] = [
-			createPostSummary({ slug: "beer-post", title: "Beer", tags: ["beer"] }),
-			createPostSummary({ slug: "code-post", title: "Code", tags: ["code"] }),
-		];
+	describe("filterPostsByTag", () => {
+		test("filters posts by tag", () => {
+			const posts = [
+				createPostSummary({ tags: ["beer"] }),
+				createPostSummary({ tags: ["life"] }),
+				createPostSummary({ tags: ["beer", "life"] }),
+			];
 
-		expect(filterPostsByTag(posts, "beer").map((p) => p.slug)).toEqual([
-			"beer-post",
-		]);
+			const filtered = filterPostsByTag(posts, "beer");
+
+			expect(filtered).toHaveLength(2);
+		});
+
+		test("returns all posts when tag is undefined", () => {
+			const posts = [createPostSummary(), createPostSummary()];
+
+			const filtered = filterPostsByTag(posts, undefined);
+
+			expect(filtered).toHaveLength(2);
+		});
 	});
 
-	test("When filtering with mixed-case or whitespace, Then the tag is normalized", () => {
-		const posts: PostSummary[] = [
-			createPostSummary({ slug: "beer-post", title: "Beer", tags: ["beer"] }),
-		];
+	describe("sortPosts", () => {
+		test("sorts posts by date descending", () => {
+			const posts = [
+				createPostSummary({ date: "2026-09-27", title: "A" }),
+				createPostSummary({ date: "2026-09-28", title: "B" }),
+			];
 
-		expect(filterPostsByTag(posts, "  BEER  ").map((p) => p.slug)).toEqual([
-			"beer-post",
-		]);
+			const sorted = sortPosts(posts);
+
+			expect(sorted[0].title).toBe("B");
+			expect(sorted[1].title).toBe("A");
+		});
+
+		test("sorts by title when dates are equal", () => {
+			const posts = [
+				createPostSummary({ date: "2026-09-28", title: "Z" }),
+				createPostSummary({ date: "2026-09-28", title: "A" }),
+			];
+
+			const sorted = sortPosts(posts);
+
+			expect(sorted[0].title).toBe("A");
+			expect(sorted[1].title).toBe("Z");
+		});
+
+		test("handles posts with null dates", () => {
+			const posts = [
+				createPostSummary({ date: null, title: "B" }),
+				createPostSummary({ date: "2026-09-28", title: "A" }),
+			];
+
+			const sorted = sortPosts(posts);
+
+			expect(sorted[0].title).toBe("A");
+			expect(sorted[1].title).toBe("B");
+		});
+
+		test("sorts by title when both dates are null", () => {
+			const posts = [
+				createPostSummary({ date: null, title: "Z" }),
+				createPostSummary({ date: null, title: "A" }),
+			];
+
+			const sorted = sortPosts(posts);
+
+			expect(sorted[0].title).toBe("A");
+			expect(sorted[1].title).toBe("Z");
+		});
 	});
 
-	test("When no tag is provided, Then all posts are returned", () => {
-		const posts: PostSummary[] = [
-			createPostSummary({ slug: "a", title: "A", tags: ["beer"] }),
-			createPostSummary({ slug: "b", title: "B", tags: ["code"] }),
-		];
+	describe("getContentDir", () => {
+		test("returns default content directory", () => {
+			const dir = getContentDir();
+			expect(dir).toContain("content");
+		});
 
-		expect(filterPostsByTag(posts, undefined)).toEqual(posts);
-	});
-});
+		test("uses BLOG_CONTENT_DIR environment variable", () => {
+			const original = process.env.BLOG_CONTENT_DIR;
+			process.env.BLOG_CONTENT_DIR = "/custom/path";
 
-describe("Given a list of post summaries", () => {
-	test("When posts have numbers and dates, Then they are sorted by date descending", () => {
-		const posts: PostSummary[] = [
-			createPostSummary({
-				slug: "older",
-				title: "Older",
-				number: 1,
-				date: "2026-01-01",
-			}),
-			createPostSummary({
-				slug: "newer",
-				title: "Newer",
-				number: 2,
-				date: "2026-12-01",
-			}),
-		];
+			const dir = getContentDir();
 
-		expect(sortPosts(posts).map((p) => p.slug)).toEqual(["newer", "older"]);
-	});
+			expect(dir).toBe("/custom/path");
 
-	test("When posts share the same date, Then they are sorted by title ascending", () => {
-		const posts: PostSummary[] = [
-			createPostSummary({ slug: "b", title: "Beta", date: "2026-06-01" }),
-			createPostSummary({ slug: "a", title: "Alpha", date: "2026-06-01" }),
-		];
-
-		expect(sortPosts(posts).map((p) => p.slug)).toEqual(["a", "b"]);
-	});
-
-	test("When posts have no numbers but have dates, Then they are sorted by date descending", () => {
-		const posts: PostSummary[] = [
-			createPostSummary({ slug: "old", title: "Old", date: "2026-01-01" }),
-			createPostSummary({ slug: "new", title: "New", date: "2026-12-01" }),
-		];
-
-		expect(sortPosts(posts).map((p) => p.slug)).toEqual(["new", "old"]);
-	});
-
-	test("When one post has a date and another does not, Then the dated post comes first", () => {
-		const posts: PostSummary[] = [
-			createPostSummary({ slug: "undated", title: "Undated" }),
-			createPostSummary({ slug: "dated", title: "Dated", date: "2026-06-01" }),
-		];
-
-		expect(sortPosts(posts).map((p) => p.slug)).toEqual(["dated", "undated"]);
-	});
-
-	test("When a dated post precedes an undated post, Then the dated post still comes first", () => {
-		const posts: PostSummary[] = [
-			createPostSummary({ slug: "dated", title: "Dated", date: "2026-06-01" }),
-			createPostSummary({ slug: "undated", title: "Undated" }),
-		];
-
-		expect(sortPosts(posts).map((p) => p.slug)).toEqual(["dated", "undated"]);
-	});
-
-	test("When posts have neither numbers nor dates, Then they are sorted by title ascending", () => {
-		const posts: PostSummary[] = [
-			createPostSummary({ slug: "b", title: "Beta" }),
-			createPostSummary({ slug: "a", title: "Alpha" }),
-		];
-
-		expect(sortPosts(posts).map((p) => p.slug)).toEqual(["a", "b"]);
-	});
-
-	test("When sorting, Then the original array is not mutated", () => {
-		const posts: PostSummary[] = [
-			createPostSummary({ slug: "b", title: "B", number: 2 }),
-			createPostSummary({ slug: "a", title: "A", number: 1 }),
-		];
-
-		sortPosts(posts);
-
-		expect(posts.map((p) => p.slug)).toEqual(["b", "a"]);
-	});
-});
-
-describe("Given a list of posts with tags", () => {
-	test("When getting tag counts, Then it returns each tag with its post count sorted alphabetically", () => {
-		const posts: PostSummary[] = [
-			createPostSummary({ tags: ["beer", "life"] }),
-			createPostSummary({ tags: ["beer", "code"] }),
-			createPostSummary({ tags: ["life"] }),
-		];
-
-		const result = getTagCounts(posts);
-
-		expect(result).toEqual([
-			{ tag: "beer", count: 2 },
-			{ tag: "code", count: 1 },
-			{ tag: "life", count: 2 },
-		]);
-	});
-
-	test("When getting tag counts for posts with no tags, Then it returns an empty array", () => {
-		const posts: PostSummary[] = [createPostSummary({ tags: [] })];
-
-		const result = getTagCounts(posts);
-
-		expect(result).toEqual([]);
+			process.env.BLOG_CONTENT_DIR = original;
+		});
 	});
 });

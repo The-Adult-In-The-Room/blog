@@ -1,3 +1,4 @@
+import { parseMarkdown } from "@tanstack/markdown/parser";
 import type { Post, PostSummary } from "../lib/posts";
 
 export const beerPostSummary: PostSummary = {
@@ -67,7 +68,9 @@ export function createPost(overrides: Partial<Post> = {}): Post {
 		title: "Default Post",
 		date: null,
 		excerpt: "",
-		content: "<p>Default content.</p>",
+		content: parseMarkdown("Default content.", {
+			frontmatter: true,
+		}),
 		tags: [],
 		number: null,
 		draft: false,

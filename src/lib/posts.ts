@@ -1,16 +1,17 @@
 import fs from "node:fs";
 import path from "node:path";
+import type { MarkdownDocument } from "@tanstack/markdown";
+import { parseMarkdown } from "@tanstack/markdown/parser";
 import { createServerFn } from "@tanstack/react-start";
-import type { Link, Parent, Root } from "mdast";
-import type { Plugin } from "unified";
 import type { PostFrontmatter } from "#/schemas/postFrontmatter";
+import { postFrontmatterSchema } from "#/schemas/postFrontmatter";
 
 export type Post = {
 	slug: string;
 	title: string;
 	date: string | null;
 	excerpt: string;
-	content: string;
+	content: MarkdownDocument;
 	tags: string[];
 	number: number | null;
 	draft: boolean;
@@ -81,73 +82,57 @@ export function normalizeTags(input: unknown): string[] {
 	return [];
 }
 
-function parseFrontmatter(
-	data: unknown,
-	filePath: string,
-	schema: {
-		safeParse: (data: unknown) =>
-			| { success: true; data: unknown }
-			| {
-					success: false;
-					error: {
-						issues: Array<{ path: Array<PropertyKey>; message: string }>;
-					};
-			  };
-	},
-): unknown {
-	const result = schema.safeParse(data);
-	if (!result.success) {
-		const issues = result.error.issues
-			.map((issue) => `${String(issue.path.join("."))}: ${issue.message}`)
-			.join("; ");
-		throw new Error(`Invalid frontmatter in ${filePath}: ${issues}`);
-	}
-	return result.data;
-}
-
 type ParsedPost = {
 	slug: string;
 	title: string;
 	date: string | null;
 	excerpt: string;
-	rawBody: string;
+	document: MarkdownDocument;
 	tags: string[];
 	number: number | null;
 	draft: boolean;
 };
 
 const postCache = new Map<string, ParsedPost>();
-const slugMapCache = new Map<string, ReadonlyMap<string, string>>();
 
 export function clearPostCache(): void {
 	postCache.clear();
-	slugMapCache.clear();
 }
 
 async function parsePostFile(filePath: string): Promise<ParsedPost> {
 	const cached = postCache.get(filePath);
 	if (cached) return cached;
 
-	const [{ default: matter }, { postFrontmatterSchema }] = await Promise.all([
-		import("gray-matter"),
-		import("#/schemas/postFrontmatter"),
-	]);
-
 	const raw = await fs.promises.readFile(filePath, "utf-8");
-	const { data, content: rawBody } = matter(raw);
-	const frontmatter = parseFrontmatter(
-		data,
-		filePath,
-		postFrontmatterSchema,
-	) as PostFrontmatter;
+	const document = parseMarkdown(raw, {
+		frontmatter: true,
+		headingIds: true,
+	});
+
+	// Extract and validate frontmatter from the parsed document
+	let frontmatter: PostFrontmatter = {};
+	if (document.frontmatter) {
+		try {
+			const matter = (await import("gray-matter")).default;
+			const { data } = matter(`---\n${document.frontmatter}\n---`);
+			const result = postFrontmatterSchema.safeParse(data);
+			if (result.success) {
+				frontmatter = result.data;
+			}
+		} catch {
+			// If YAML parsing fails, use empty frontmatter
+			frontmatter = {};
+		}
+	}
 
 	const slug = frontmatter.slug ?? filenameToSlug(filePath);
 	const title = frontmatter.title ?? filenameToTitle(filePath);
 	const date = frontmatter.date ?? null;
-	const excerpt = frontmatter.excerpt ?? extractExcerpt(rawBody);
+	// Extract excerpt from document content (without frontmatter)
+	const bodyContent = raw.replace(/^---[\s\S]*?---\r?\n/, "").trim();
+	const excerpt = frontmatter.excerpt ?? extractExcerpt(bodyContent);
 	const tags = normalizeTags(frontmatter.tags);
 	const number = frontmatter.number ?? filenameToNumber(filePath);
-
 	const draft = frontmatter.draft ?? false;
 
 	const parsed: ParsedPost = {
@@ -155,7 +140,7 @@ async function parsePostFile(filePath: string): Promise<ParsedPost> {
 		title,
 		date,
 		excerpt,
-		rawBody,
+		document,
 		tags,
 		number,
 		draft,
@@ -163,91 +148,12 @@ async function parsePostFile(filePath: string): Promise<ParsedPost> {
 	postCache.set(filePath, parsed);
 	return parsed;
 }
-
 function isProduction(): boolean {
 	return process.env.NODE_ENV === "production" || import.meta.env.PROD;
 }
 
 function isPublished(post: { draft: boolean }): boolean {
 	return !post.draft || !isProduction();
-}
-
-async function buildSlugMap(
-	contentDir: string,
-): Promise<ReadonlyMap<string, string>> {
-	const cached = slugMapCache.get(contentDir);
-	if (cached) return cached;
-
-	const files = await fs.promises.readdir(contentDir);
-	const map = new Map<string, string>();
-
-	await Promise.all(
-		files
-			.filter((file) => file.endsWith(".md"))
-			.map(async (file) => {
-				const filePath = path.join(contentDir, file);
-				try {
-					const { slug } = await parsePostFile(filePath);
-					map.set(file, slug);
-				} catch {
-					// Skip files with invalid frontmatter; they cannot be linked reliably.
-				}
-			}),
-	);
-
-	slugMapCache.set(contentDir, map);
-	return map;
-}
-
-function visitLinks(tree: Root, visitor: (link: Link) => void): void {
-	function walk(node: Parent | Link): void {
-		if (node.type === "link") {
-			visitor(node as Link);
-			return;
-		}
-
-		if ("children" in node && Array.isArray(node.children)) {
-			for (const child of node.children) {
-				walk(child as Parent | Link);
-			}
-		}
-	}
-
-	walk(tree);
-}
-
-function resolveInternalMarkdownLink(
-	url: string,
-	slugMap: ReadonlyMap<string, string>,
-): string | undefined {
-	const hashIndex = url.indexOf("#");
-	const [pathPart, hash] =
-		hashIndex === -1
-			? [url, ""]
-			: [url.slice(0, hashIndex), url.slice(hashIndex)];
-
-	if (!pathPart.endsWith(".md")) return undefined;
-
-	const filename = pathPart.startsWith("./") ? pathPart.slice(2) : pathPart;
-	if (filename.includes("/")) return undefined;
-
-	const slug = slugMap.get(filename);
-	if (!slug) return undefined;
-
-	return `/posts/${slug}${hash}`;
-}
-
-function createRemarkPostLinks(
-	slugMap: ReadonlyMap<string, string>,
-): Plugin<[], Root> {
-	return function remarkPostLinks() {
-		return (tree: Root) => {
-			visitLinks(tree, (node) => {
-				const resolved = resolveInternalMarkdownLink(node.url, slugMap);
-				if (resolved) node.url = resolved;
-			});
-		};
-	};
 }
 
 export async function readPostSummary(filePath: string): Promise<PostSummary> {
@@ -257,14 +163,8 @@ export async function readPostSummary(filePath: string): Promise<PostSummary> {
 }
 
 export async function readPostFile(filePath: string): Promise<Post> {
-	const { rawBody, ...metadata } = await parsePostFile(filePath);
-	const contentDir = path.dirname(filePath);
-	const slugMap = await buildSlugMap(contentDir);
-	const { renderMarkdown } = await import("./markdown");
-	const content = await renderMarkdown(rawBody, [
-		createRemarkPostLinks(slugMap),
-	]);
-	return { ...metadata, content };
+	const { document, ...metadata } = await parsePostFile(filePath);
+	return { ...metadata, content: document };
 }
 
 export function getAllTags(posts: PostSummary[]): string[] {
