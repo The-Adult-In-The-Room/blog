@@ -16,6 +16,7 @@
 			"**/vite.config.ts",
 			"!coverage",
 			"!.output",
+			"!playwright-report",
 			"!**/src/routeTree.gen.ts",
 			"!**/src/styles.css"
 		]

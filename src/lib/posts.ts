@@ -3,6 +3,8 @@ import path from "node:path";
 import type { MarkdownDocument } from "@tanstack/markdown";
 import { parseMarkdown } from "@tanstack/markdown/parser";
 import { createServerFn } from "@tanstack/react-start";
+import type { PostFrontmatter } from "#/schemas/postFrontmatter";
+import { postFrontmatterSchema } from "#/schemas/postFrontmatter";
 
 export type Post = {
 	slug: string;
@@ -85,7 +87,7 @@ type ParsedPost = {
 	title: string;
 	date: string | null;
 	excerpt: string;
-	rawBody: string;
+	document: MarkdownDocument;
 	tags: string[];
 	number: number | null;
 	draft: boolean;
@@ -97,72 +99,48 @@ export function clearPostCache(): void {
 	postCache.clear();
 }
 
-function extractFrontmatter(source: string): Record<string, unknown> {
-	const match = source.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-	if (!match) return {};
-
-	const frontmatter: Record<string, unknown> = {};
-	const lines = match[1].split("\n");
-
-	for (const line of lines) {
-		const colonIndex = line.indexOf(":");
-		if (colonIndex === -1) continue;
-
-		const key = line.slice(0, colonIndex).trim();
-		let value: unknown = line.slice(colonIndex + 1).trim();
-
-		// Parse simple YAML values
-		if (value === "true") value = true;
-		else if (value === "false") value = false;
-		else if (/^\d+$/.test(value as string))
-			value = Number.parseInt(value as string, 10);
-		else if (/^\d+\.\d+$/.test(value as string))
-			value = Number.parseFloat(value as string);
-		else if (
-			(value as string).startsWith("[") &&
-			(value as string).endsWith("]")
-		) {
-			// Parse simple array like [tag1, tag2, tag3]
-			const arrayContent = (value as string).slice(1, -1);
-			value = arrayContent
-				.split(",")
-				.map((item) => item.trim().replace(/^["']|["']$/g, ""))
-				.filter(Boolean);
-		} else {
-			// Remove quotes if present
-			value = (value as string).replace(/^["']|["']$/g, "");
-		}
-
-		frontmatter[key] = value;
-	}
-
-	return frontmatter;
-}
-
 async function parsePostFile(filePath: string): Promise<ParsedPost> {
 	const cached = postCache.get(filePath);
 	if (cached) return cached;
 
 	const raw = await fs.promises.readFile(filePath, "utf-8");
-	const frontmatter = extractFrontmatter(raw);
+	const document = parseMarkdown(raw, {
+		frontmatter: true,
+		headingIds: true,
+	});
 
-	// Remove frontmatter from body
-	const rawBody = raw.replace(/^---[\s\S]*?---\r?\n/, "").trim();
+	// Extract and validate frontmatter from the parsed document
+	let frontmatter: PostFrontmatter = {};
+	if (document.frontmatter) {
+		try {
+			const matter = (await import("gray-matter")).default;
+			const { data } = matter(`---\n${document.frontmatter}\n---`);
+			const result = postFrontmatterSchema.safeParse(data);
+			if (result.success) {
+				frontmatter = result.data;
+			}
+		} catch {
+			// If YAML parsing fails, use empty frontmatter
+			frontmatter = {};
+		}
+	}
 
-	const slug = (frontmatter.slug as string) ?? filenameToSlug(filePath);
-	const title = (frontmatter.title as string) ?? filenameToTitle(filePath);
-	const date = frontmatter.date ? String(frontmatter.date) : null;
-	const excerpt = (frontmatter.excerpt as string) ?? extractExcerpt(rawBody);
+	const slug = frontmatter.slug ?? filenameToSlug(filePath);
+	const title = frontmatter.title ?? filenameToTitle(filePath);
+	const date = frontmatter.date ?? null;
+	// Extract excerpt from document content (without frontmatter)
+	const bodyContent = raw.replace(/^---[\s\S]*?---\r?\n/, "").trim();
+	const excerpt = frontmatter.excerpt ?? extractExcerpt(bodyContent);
 	const tags = normalizeTags(frontmatter.tags);
-	const number = (frontmatter.number as number) ?? filenameToNumber(filePath);
-	const draft = (frontmatter.draft as boolean) ?? false;
+	const number = frontmatter.number ?? filenameToNumber(filePath);
+	const draft = frontmatter.draft ?? false;
 
 	const parsed: ParsedPost = {
 		slug,
 		title,
 		date,
 		excerpt,
-		rawBody,
+		document,
 		tags,
 		number,
 		draft,
@@ -170,7 +148,6 @@ async function parsePostFile(filePath: string): Promise<ParsedPost> {
 	postCache.set(filePath, parsed);
 	return parsed;
 }
-
 function isProduction(): boolean {
 	return process.env.NODE_ENV === "production" || import.meta.env.PROD;
 }
@@ -186,11 +163,8 @@ export async function readPostSummary(filePath: string): Promise<PostSummary> {
 }
 
 export async function readPostFile(filePath: string): Promise<Post> {
-	const { rawBody, ...metadata } = await parsePostFile(filePath);
-	const content = parseMarkdown(rawBody, {
-		frontmatter: true,
-	});
-	return { ...metadata, content };
+	const { document, ...metadata } = await parsePostFile(filePath);
+	return { ...metadata, content: document };
 }
 
 export function getAllTags(posts: PostSummary[]): string[] {
