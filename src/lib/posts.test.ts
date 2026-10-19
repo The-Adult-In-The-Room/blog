@@ -314,13 +314,13 @@ describe("posts", () => {
 	});
 
 	describe("getAllTags", () => {
-		test("returns unique sorted tags", async () => {
+		test("returns unique sorted tags", () => {
 			const posts = [
 				createPostSummary({ tags: ["beer", "life"] }),
 				createPostSummary({ tags: ["code", "beer"] }),
 			];
 
-			const tags = await getAllTags(posts);
+			const tags = getAllTags(posts);
 
 			expect(tags).toEqual(["beer", "code", "life"]);
 		});

@@ -1,10 +1,7 @@
 import { getAllTags, type PostSummary } from "./posts";
 import { escapeXml } from "./xml";
 
-export async function generateSitemap(
-	baseUrl: string,
-	posts: PostSummary[],
-): Promise<string> {
+export function generateSitemap(baseUrl: string, posts: PostSummary[]): string {
 	const origin = baseUrl.replace(/\/$/, "");
 	const urls: string[] = [
 		`<url><loc>${escapeXml(origin)}/</loc></url>`,
@@ -17,8 +14,7 @@ export async function generateSitemap(
 		urls.push(`<url><loc>${escapeXml(loc)}</loc>${lastmod}</url>`);
 	}
 
-	const allTags = await getAllTags(posts);
-	for (const tag of allTags) {
+	for (const tag of getAllTags(posts)) {
 		const loc = `${origin}/tags/${tag}`;
 		urls.push(`<url><loc>${escapeXml(loc)}</loc></url>`);
 	}

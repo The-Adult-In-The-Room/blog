@@ -3,7 +3,7 @@ import { createPostSummary } from "../test-utils/fixtures";
 import { generateSitemap } from "./sitemap";
 
 describe("Given a base URL and a list of posts", () => {
-	test("When generating a sitemap, Then it includes the home page, posts, and tags", async () => {
+	test("When generating a sitemap, Then it includes the home page, posts, and tags", () => {
 		const posts = [
 			createPostSummary({
 				slug: "hello-world",
@@ -19,7 +19,7 @@ describe("Given a base URL and a list of posts", () => {
 			}),
 		];
 
-		const sitemap = await generateSitemap("https://example.com/", posts);
+		const sitemap = generateSitemap("https://example.com/", posts);
 
 		expect(sitemap).toContain('<?xml version="1.0" encoding="UTF-8"?>');
 		expect(sitemap).toContain(
@@ -36,7 +36,7 @@ describe("Given a base URL and a list of posts", () => {
 		expect(sitemap).toContain("<loc>https://example.com/tags/life</loc>");
 	});
 
-	test("When a post has no date, Then lastmod is omitted", async () => {
+	test("When a post has no date, Then lastmod is omitted", () => {
 		const posts = [
 			createPostSummary({
 				slug: "undated",
@@ -45,7 +45,7 @@ describe("Given a base URL and a list of posts", () => {
 			}),
 		];
 
-		const sitemap = await generateSitemap("https://example.com", posts);
+		const sitemap = generateSitemap("https://example.com", posts);
 
 		expect(sitemap).toContain(
 			"<loc>https://example.com/posts/undated</loc></url>",
@@ -53,7 +53,7 @@ describe("Given a base URL and a list of posts", () => {
 		expect(sitemap).not.toContain("<lastmod>");
 	});
 
-	test("When content contains XML-special characters, Then they are escaped", async () => {
+	test("When content contains XML-special characters, Then they are escaped", () => {
 		const posts = [
 			createPostSummary({
 				slug: "special",
@@ -63,7 +63,7 @@ describe("Given a base URL and a list of posts", () => {
 			}),
 		];
 
-		const sitemap = await generateSitemap("https://example.com", posts);
+		const sitemap = generateSitemap("https://example.com", posts);
 
 		expect(sitemap).toContain("<loc>https://example.com/tags/a&amp;b</loc>");
 	});

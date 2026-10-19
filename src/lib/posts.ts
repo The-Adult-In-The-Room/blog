@@ -194,7 +194,7 @@ export async function readPostFile(filePath: string): Promise<Post> {
 	return { ...metadata, content };
 }
 
-export async function getAllTags(posts: PostSummary[]): Promise<string[]> {
+export function getAllTags(posts: PostSummary[]): string[] {
 	const tagSet = new Set<string>();
 	for (const post of posts) {
 		for (const tag of post.tags) {

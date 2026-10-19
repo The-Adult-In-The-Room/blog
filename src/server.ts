@@ -22,7 +22,7 @@ async function handleRss(request: Request): Promise<Response> {
 async function handleSitemap(request: Request): Promise<Response> {
 	const origin = getPublicOrigin(request);
 	const posts = await getPostsFromDir(getContentDir());
-	const body = await generateSitemap(origin, posts);
+	const body = generateSitemap(origin, posts);
 	return new Response(body, {
 		headers: { "Content-Type": "application/xml; charset=utf-8" },
 	});
