@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import babel from "@rolldown/plugin-babel";
 import tailwindcss from "@tailwindcss/vite";
+import { devtools } from "@tanstack/devtools-vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact, { reactCompilerPreset } from "@vitejs/plugin-react";
 import matter from "gray-matter";
@@ -54,6 +55,7 @@ const config = defineConfig({
 		sourcemap: true,
 	},
 	plugins: [
+		devtools(),
 		nitro({
 			compressPublicAssets: {
 				gzip: true,

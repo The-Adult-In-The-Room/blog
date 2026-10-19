@@ -6,7 +6,7 @@ export async function tagLoader({ params }: { params: { tag: string } }) {
 	const posts = await getPosts();
 	const activeTag = params.tag.toLowerCase().trim();
 	const filteredPosts = filterPostsByTag(posts, activeTag);
-	const allTags = getAllTags(posts);
+	const allTags = await getAllTags(posts);
 
 	return {
 		tag: activeTag,
