@@ -189,7 +189,6 @@ export async function readPostFile(filePath: string): Promise<Post> {
 	const { rawBody, ...metadata } = await parsePostFile(filePath);
 	const content = parseMarkdown(rawBody, {
 		frontmatter: true,
-		headingIds: true,
 	});
 	return { ...metadata, content };
 }

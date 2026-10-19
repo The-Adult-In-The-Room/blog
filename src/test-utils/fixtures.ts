@@ -70,7 +70,6 @@ export function createPost(overrides: Partial<Post> = {}): Post {
 		excerpt: "",
 		content: parseMarkdown("Default content.", {
 			frontmatter: true,
-			headingIds: true,
 		}),
 		tags: [],
 		number: null,
