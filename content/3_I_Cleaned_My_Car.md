@@ -6,7 +6,7 @@ tags:
   - life
 ---
 
-I don't know how to start this one. Remember in the [Rules of Engagement](./1_Rules_Of_Engagement.md) when I said I can envision the middle and end, but struggle with the start? Yeah man, sucks to be stuck here again. 
+I don't know how to start this one. Remember in the [Rules of Engagement](https://its-giving-winning.com/posts/rules-of-engagement) when I said I can envision the middle and end, but struggle with the start? Yeah man, sucks to be stuck here again. 
 
 I think as a reader you'll just have to accept that sometimes I need time to get the car warmed up enough to clear the windshield so we can go for a drive. Meanwhile you're sitting in the passenger seat freezing, watching your breath float through the air.
 
