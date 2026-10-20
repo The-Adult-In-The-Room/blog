@@ -142,6 +142,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 		<html lang="en" suppressHydrationWarning>
 			<head>
 				<script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+				<script
+					defer
+					src="https://umami-production-46f9.up.railway.app/script.js"
+					data-website-id="794b9d84-db40-4f55-ae64-231fdc1d4a59"
+				/>
 				<HeadContent />
 			</head>
 			<body className="flex min-h-screen flex-col font-sans antialiased [overflow-wrap:anywhere] selection:bg-[var(--selection-bg)]">
