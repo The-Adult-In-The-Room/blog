@@ -57,6 +57,12 @@ export class HomePage {
 		return this.tagCloud.getByRole("link", { name: tag });
 	}
 
+	async tagLinkCount(tag: string): Promise<number> {
+		const text = await this.tagLink(tag).textContent();
+		const match = text?.match(/\d+$/);
+		return match ? Number.parseInt(match[0], 10) : 0;
+	}
+
 	/**
 	 * Every post card currently rendered, in document order. This is the oracle
 	 * the regression suite measures the feeds against.

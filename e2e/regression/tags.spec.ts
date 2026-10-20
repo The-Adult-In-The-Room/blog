@@ -76,6 +76,24 @@ test.describe("GIVEN the deployed tag index page", () => {
 			await expect(tagsPage.postCards).toHaveCount(expected.length);
 		});
 	});
+
+	test("WHEN the page is loaded, THEN each tag count matches the number of posts on its detail page", async ({
+		tagsPage,
+	}) => {
+		await tagsPage.goto();
+
+		const labels = await tagsPage.tagLinks.allTextContents();
+		expect(labels.length).toBeGreaterThan(0);
+
+		for (const label of labels) {
+			const match = label.match(/^(\D+)(\d+)$/);
+			expect(match).not.toBeNull();
+			const [, tag, count] = match as RegExpMatchArray;
+
+			await tagsPage.gotoTag(tag);
+			await expect(tagsPage.postCards).toHaveCount(Number.parseInt(count, 10));
+		}
+	});
 });
 
 test.describe("GIVEN the deployed tag detail page", () => {

@@ -13,23 +13,36 @@ test.describe("GIVEN the home page", () => {
 		);
 	});
 
-	test("WHEN the page is loaded, THEN it renders a tag cloud and a browse-all-tags link", async ({
+	test("WHEN the page is loaded, THEN it renders a tag cloud with the expected tags and counts", async ({
 		homePage,
 	}) => {
 		await homePage.goto();
 
 		await expect(homePage.tagCloud).toBeVisible();
-		await expect(homePage.browseAllTagsLink).toBeVisible();
-		await expect(homePage.browseAllTagsLink).toHaveAttribute("href", "/tags");
+		await expect(homePage.tagLink("beer")).toHaveText("beer3");
+		await expect(homePage.tagLink("brewing")).toHaveText("brewing1");
+		await expect(homePage.tagLink("code")).toHaveText("code1");
+		await expect(homePage.tagLink("life")).toHaveText("life1");
+		await expect(homePage.tagLink("patterns")).toHaveText("patterns1");
 	});
 
-	test("WHEN a tag in the cloud is clicked, THEN it navigates to the tag detail page", async ({
+	test("WHEN the browse-all-tags link is clicked, THEN it navigates to the tags index page", async ({
 		homePage,
 	}) => {
 		await homePage.goto();
 
-		await homePage.tagCloud.getByRole("link").first().click();
+		await homePage.browseAllTagsLink.click();
 
-		await expect(homePage.page).toHaveURL(/\/tags\//);
+		await expect(homePage.page).toHaveURL("/tags");
+	});
+
+	test("WHEN a specific tag in the cloud is clicked, THEN it navigates to that tag detail page", async ({
+		homePage,
+	}) => {
+		await homePage.goto();
+
+		await homePage.tagLink("beer").click();
+
+		await expect(homePage.page).toHaveURL("/tags/beer");
 	});
 });

@@ -33,6 +33,18 @@ export class TagsPage {
 		return this.tagChips.filter({ hasText: new RegExp(`^${label}\\d*$`) });
 	}
 
+	async tagLinkCount(label: string): Promise<number> {
+		const text = await this.tagLink(label).textContent();
+		const match = text?.match(/\d+$/);
+		return match ? Number.parseInt(match[0], 10) : 0;
+	}
+
+	async tagChipCount(label: string): Promise<number> {
+		const text = await this.tagChip(label).textContent();
+		const match = text?.match(/\d+$/);
+		return match ? Number.parseInt(match[0], 10) : 0;
+	}
+
 	postCard(title: string): Locator {
 		return this.page.locator("li", {
 			has: this.page.locator("h3", { hasText: title }),

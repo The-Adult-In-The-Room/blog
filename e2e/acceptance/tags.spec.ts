@@ -2,6 +2,14 @@ import { expect, test } from "../fixtures/test";
 
 const EXPECTED_TAGS = ["beer", "brewing", "code", "life", "patterns"];
 
+const EXPECTED_TAG_COUNTS: Record<string, number> = {
+	beer: 3,
+	brewing: 1,
+	code: 1,
+	life: 1,
+	patterns: 1,
+};
+
 const BEER_POSTS = [
 	"The story of Larry Bell",
 	"Brewing Basics",
@@ -9,7 +17,7 @@ const BEER_POSTS = [
 ];
 
 test.describe("GIVEN the tags index page", () => {
-	test("WHEN the page is loaded, THEN every unique tag is listed as a link", async ({
+	test("WHEN the page is loaded, THEN every unique tag is listed as a link with its post count", async ({
 		tagsPage,
 	}) => {
 		await tagsPage.goto();
@@ -18,7 +26,9 @@ test.describe("GIVEN the tags index page", () => {
 		await expect(tagsPage.heading).toHaveText("Tags");
 
 		for (const tag of EXPECTED_TAGS) {
-			await expect(tagsPage.tagLink(tag)).toBeVisible();
+			await expect(tagsPage.tagLink(tag)).toHaveText(
+				`${tag}${EXPECTED_TAG_COUNTS[tag]}`,
+			);
 		}
 	});
 
@@ -48,15 +58,18 @@ test.describe("GIVEN a tag page", () => {
 		await expect(tagsPage.postCards).toHaveCount(BEER_POSTS.length);
 	});
 
-	test("WHEN the page is loaded, THEN all tag chips are shown with the active one marked", async ({
+	test("WHEN the page is loaded, THEN all tag chips are shown with counts and the active one marked", async ({
 		tagsPage,
 	}) => {
 		await tagsPage.gotoTag("beer");
 
 		const activeChip = tagsPage.tagChip("beer");
 		await expect(activeChip).toHaveAttribute("aria-current", "page");
+		await expect(activeChip).toHaveText(`beer${EXPECTED_TAG_COUNTS.beer}`);
 
-		await expect(tagsPage.tagChip("life")).toBeVisible();
+		await expect(tagsPage.tagChip("life")).toHaveText(
+			`life${EXPECTED_TAG_COUNTS.life}`,
+		);
 		await expect(tagsPage.tagChip("life")).not.toHaveAttribute(
 			"aria-current",
 			"page",
