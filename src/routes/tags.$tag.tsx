@@ -8,11 +8,10 @@ import {
 } from "../lib/posts";
 
 export async function tagLoader({ params }: { params: { tag: string } }) {
-	const posts = await getPosts();
+	const [posts, tagCounts] = await Promise.all([getPosts(), getTagCounts()]);
 	const activeTag = params.tag.toLowerCase().trim();
 	const filteredPosts = filterPostsByTag(posts, activeTag);
 	const allTags = getAllTags(posts);
-	const tagCounts = getTagCounts(posts);
 
 	return {
 		tag: activeTag,

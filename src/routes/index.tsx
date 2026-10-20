@@ -3,10 +3,10 @@ import TagList from "../components/TagList";
 import { getPosts, getTagCounts } from "../lib/posts";
 
 export async function homeLoader() {
-	const posts = await getPosts();
+	const [posts, tagCounts] = await Promise.all([getPosts(), getTagCounts()]);
 	return {
 		posts,
-		tagCounts: getTagCounts(posts),
+		tagCounts,
 	};
 }
 

@@ -1,4 +1,4 @@
-import { describe, expect, test, vi } from "vitest";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 import {
 	beerPostSummary,
 	codePostSummary,
@@ -11,15 +11,29 @@ vi.mock("../lib/posts", async (importOriginal) => {
 	return {
 		...actual,
 		getPosts: vi.fn(),
+		getTagCounts: vi.fn(),
 	};
 });
 
-const { getPosts: mockedGetPosts } = await import("../lib/posts");
+const {
+	getPosts: mockedGetPosts,
+	getTagCounts: mockedGetTagCounts,
+	clearTagCountsCache,
+} = await import("../lib/posts");
 
 describe("Given the home route loader", () => {
+	beforeEach(() => {
+		clearTagCountsCache();
+	});
+
 	test("When loaded, Then it returns all posts and sorted tag counts", async () => {
 		const posts = [beerPostSummary, lifePostSummary, codePostSummary];
 		vi.mocked(mockedGetPosts).mockResolvedValue(posts);
+		vi.mocked(mockedGetTagCounts).mockResolvedValue([
+			{ tag: "beer", count: 1 },
+			{ tag: "code", count: 1 },
+			{ tag: "life", count: 2 },
+		]);
 
 		const result = await homeLoader();
 
@@ -32,10 +46,12 @@ describe("Given the home route loader", () => {
 			],
 		});
 		expect(mockedGetPosts).toHaveBeenCalledTimes(1);
+		expect(mockedGetTagCounts).toHaveBeenCalledTimes(1);
 	});
 
 	test("When there are no posts, Then it returns empty posts and tag counts", async () => {
 		vi.mocked(mockedGetPosts).mockResolvedValue([]);
+		vi.mocked(mockedGetTagCounts).mockResolvedValue([]);
 
 		const result = await homeLoader();
 

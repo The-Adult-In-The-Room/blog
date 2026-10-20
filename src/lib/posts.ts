@@ -97,6 +97,7 @@ const postCache = new Map<string, ParsedPost>();
 
 export function clearPostCache(): void {
 	postCache.clear();
+	clearTagCountsCache();
 }
 
 async function parsePostFile(filePath: string): Promise<ParsedPost> {
@@ -182,7 +183,7 @@ export type TagCount = {
 	count: number;
 };
 
-export function getTagCounts(posts: PostSummary[]): TagCount[] {
+export function computeTagCounts(posts: PostSummary[]): TagCount[] {
 	const counts = new Map<string, number>();
 	for (const post of posts) {
 		for (const tag of post.tags) {
@@ -192,6 +193,12 @@ export function getTagCounts(posts: PostSummary[]): TagCount[] {
 	return Array.from(counts.entries())
 		.map(([tag, count]) => ({ tag, count }))
 		.sort((a, b) => a.tag.localeCompare(b.tag));
+}
+
+let cachedTagCounts: TagCount[] | null = null;
+
+export function clearTagCountsCache(): void {
+	cachedTagCounts = null;
 }
 
 export function filterPostsByTag(
@@ -255,4 +262,13 @@ export const getPost = createServerFn({ method: "GET" })
 		async ({ data: slug }): Promise<Post | null> =>
 			getPostFromDir(getContentDir(), slug),
 	);
+
+export const getTagCounts = createServerFn({ method: "GET" }).handler(
+	async (): Promise<TagCount[]> => {
+		if (cachedTagCounts) return cachedTagCounts;
+		const posts = await getPosts();
+		cachedTagCounts = computeTagCounts(posts);
+		return cachedTagCounts;
+	},
+);
 /* c8 ignore stop */

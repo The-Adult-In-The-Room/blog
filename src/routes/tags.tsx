@@ -4,11 +4,10 @@ import {
 	Outlet,
 	useRouterState,
 } from "@tanstack/react-router";
-import { getPosts, getTagCounts } from "../lib/posts";
+import { getTagCounts } from "../lib/posts";
 
 export async function tagsLoader() {
-	const posts = await getPosts();
-	return getTagCounts(posts);
+	return getTagCounts();
 }
 
 export const Route = createFileRoute("/tags")({
