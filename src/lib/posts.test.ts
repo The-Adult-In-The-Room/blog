@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { createPostSummary } from "../test-utils/fixtures";
 import {
 	clearPostCache,
+	computeTagCounts,
 	extractExcerpt,
 	filenameToNumber,
 	filenameToSlug,
@@ -14,7 +15,6 @@ import {
 	getContentDir,
 	getPostFromDir,
 	getPostsFromDir,
-	getTagCounts,
 	normalizeTags,
 	readPostFile,
 	readPostSummary,
@@ -326,14 +326,14 @@ describe("posts", () => {
 		});
 	});
 
-	describe("getTagCounts", () => {
+	describe("computeTagCounts", () => {
 		test("returns tag counts sorted by tag", () => {
 			const posts = [
 				createPostSummary({ tags: ["beer", "life"] }),
 				createPostSummary({ tags: ["beer"] }),
 			];
 
-			const counts = getTagCounts(posts);
+			const counts = computeTagCounts(posts);
 
 			expect(counts).toEqual([
 				{ tag: "beer", count: 2 },

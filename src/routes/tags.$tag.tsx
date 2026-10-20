@@ -1,17 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import TagCloud from "../components/TagCloud";
 import TagList from "../components/TagList";
-import { filterPostsByTag, getAllTags, getPosts } from "../lib/posts";
+import { filterPostsByTag, getPosts, getTagCounts } from "../lib/posts";
 
 export async function tagLoader({ params }: { params: { tag: string } }) {
-	const posts = await getPosts();
+	const [posts, tagCounts] = await Promise.all([getPosts(), getTagCounts()]);
 	const activeTag = params.tag.toLowerCase().trim();
 	const filteredPosts = filterPostsByTag(posts, activeTag);
-	const allTags = getAllTags(posts);
 
 	return {
 		tag: activeTag,
 		posts: filteredPosts,
-		allTags,
+		tagCounts,
 	};
 }
 
@@ -21,7 +21,7 @@ export const Route = createFileRoute("/tags/$tag")({
 });
 
 function TagPage() {
-	const { tag, posts, allTags } = Route.useLoaderData();
+	const { tag, posts, tagCounts } = Route.useLoaderData();
 
 	return (
 		<main className="page-wrap px-4 py-12 sm:py-16">
@@ -47,31 +47,16 @@ function TagPage() {
 			</section>
 
 			<section className="space-y-6">
-				{allTags.length > 0 && (
+				{tagCounts.length > 0 && (
 					<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 						<h2 className="text-sm font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
 							All tags
 						</h2>
-						<nav
-							aria-label="Filter posts by tag"
-							className="flex flex-wrap gap-1.5"
-						>
-							{allTags.map((t) => (
-								<Link
-									key={t}
-									to="/tags/$tag"
-									params={{ tag: t }}
-									className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium transition no-underline ${
-										t === tag
-											? "border-[var(--accent-strong)] bg-[var(--surface-strong)] text-[var(--text-primary)]"
-											: "border-[var(--chip-line)] bg-[var(--chip-bg)] text-[var(--text-secondary)] hover:border-[var(--accent-strong)]/40 hover:text-[var(--text-primary)]"
-									}`}
-									aria-current={t === tag ? "page" : undefined}
-								>
-									{t}
-								</Link>
-							))}
-						</nav>
+						<TagCloud
+							tags={tagCounts}
+							activeTag={tag}
+							ariaLabel="Filter posts by tag"
+						/>
 					</div>
 				)}
 

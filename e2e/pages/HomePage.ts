@@ -17,12 +17,18 @@ export class HomePage {
 	readonly heading: Locator;
 	readonly descriptionMeta: Locator;
 	readonly postCards: Locator;
+	readonly tagCloud: Locator;
+	readonly browseAllTagsLink: Locator;
 
 	constructor(page: Page) {
 		this.page = page;
 		this.heading = page.locator("h1");
 		this.descriptionMeta = page.locator('meta[name="description"]');
 		this.postCards = page.locator("main ul > li");
+		this.tagCloud = page.locator('nav[aria-label="Filter posts by tag"]');
+		this.browseAllTagsLink = page.getByRole("link", {
+			name: "Browse all tags",
+		});
 	}
 
 	async goto(): Promise<void> {
@@ -45,6 +51,16 @@ export class HomePage {
 
 	postCardTags(title: string): Locator {
 		return this.postCard(title).locator("span");
+	}
+
+	tagLink(tag: string): Locator {
+		return this.tagCloud.getByRole("link", { name: tag });
+	}
+
+	async tagLinkCount(tag: string): Promise<number> {
+		const text = await this.tagLink(tag).textContent();
+		const match = text?.match(/\d+$/);
+		return match ? Number.parseInt(match[0], 10) : 0;
 	}
 
 	/**

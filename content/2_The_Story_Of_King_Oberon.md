@@ -4,7 +4,6 @@ date: 2026-09-28
 excerpt: Ray reminiscences his favorite brewery.
 tags:
   - beer
-  - life
 ---
 
 I attended Kalamazoo Valley Community College (KVCC) back in spring 2026 for the brewing program. I was in a class with two gals. One gal was a bartender in Kalamazoo at various establishments for the past decade. 

@@ -1,9 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import TagCloud from "../components/TagCloud";
 import TagList from "../components/TagList";
-import { getPosts } from "../lib/posts";
+import { getPosts, getTagCounts } from "../lib/posts";
 
 export async function homeLoader() {
-	return getPosts();
+	const [posts, tagCounts] = await Promise.all([getPosts(), getTagCounts()]);
+	return {
+		posts,
+		tagCounts,
+	};
 }
 
 export const Route = createFileRoute("/")({
@@ -12,7 +17,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-	const posts = Route.useLoaderData();
+	const { posts, tagCounts } = Route.useLoaderData();
 
 	return (
 		<main className="page-wrap px-4 py-12 sm:py-16">
@@ -28,7 +33,15 @@ function Home() {
 					<h2 className="text-sm font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
 						Recent posts
 					</h2>
+					<Link
+						to="/tags"
+						className="text-sm font-medium text-[var(--text-secondary)] no-underline transition hover:text-[var(--text-primary)]"
+					>
+						Browse all tags →
+					</Link>
 				</div>
+
+				<TagCloud tags={tagCounts} ariaLabel="Filter posts by tag" />
 
 				{posts.length === 0 ? (
 					<p className="text-[var(--text-secondary)]">No posts yet.</p>
