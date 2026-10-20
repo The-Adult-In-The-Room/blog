@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import TagCloud from "../components/TagCloud";
 import TagList from "../components/TagList";
 import { getPosts, getTagCounts } from "../lib/posts";
 
@@ -40,29 +41,7 @@ function Home() {
 					</Link>
 				</div>
 
-				{tagCounts.length > 0 && (
-					<nav
-						aria-label="Filter posts by tag"
-						className="flex flex-wrap gap-1.5"
-					>
-						{tagCounts.map(({ tag, count }) => (
-							<Link
-								key={tag}
-								to="/tags/$tag"
-								params={{ tag }}
-								className="inline-flex items-center gap-1.5 rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-2.5 py-0.5 text-xs font-medium text-[var(--text-secondary)] no-underline transition hover:border-[var(--accent-strong)]/40 hover:text-[var(--text-primary)]"
-							>
-								{tag}
-								<span
-									className="text-[var(--text-secondary)]/60"
-									aria-hidden="true"
-								>
-									{count}
-								</span>
-							</Link>
-						))}
-					</nav>
-				)}
+				<TagCloud tags={tagCounts} ariaLabel="Filter posts by tag" />
 
 				{posts.length === 0 ? (
 					<p className="text-[var(--text-secondary)]">No posts yet.</p>

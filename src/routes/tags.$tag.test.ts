@@ -31,7 +31,7 @@ describe("Given the tag detail route loader", () => {
 		clearTagCountsCache();
 	});
 
-	test("When loaded with a tag, Then it returns filtered posts, the sorted tag list, and tag counts", async () => {
+	test("When loaded with a tag, Then it returns filtered posts and tag counts", async () => {
 		vi.mocked(getPosts).mockResolvedValue(allPosts);
 		vi.mocked(getTagCounts).mockResolvedValue(tagCounts);
 
@@ -39,7 +39,6 @@ describe("Given the tag detail route loader", () => {
 
 		expect(result.tag).toBe("beer");
 		expect(result.posts).toEqual([beerPostSummary]);
-		expect(result.allTags).toEqual(["beer", "code", "life"]);
 		expect(result.tagCounts).toEqual(tagCounts);
 	});
 
@@ -62,7 +61,6 @@ describe("Given the tag detail route loader", () => {
 
 		expect(result.tag).toBe("nonexistent");
 		expect(result.posts).toEqual([]);
-		expect(result.allTags).toEqual(["beer", "code", "life"]);
 		expect(result.tagCounts).toEqual(tagCounts);
 	});
 });

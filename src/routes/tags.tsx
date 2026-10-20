@@ -1,9 +1,9 @@
 import {
 	createFileRoute,
-	Link,
 	Outlet,
 	useRouterState,
 } from "@tanstack/react-router";
+import TagCloud from "../components/TagCloud";
 import { getTagCounts } from "../lib/posts";
 
 export async function tagsLoader() {
@@ -38,24 +38,7 @@ function TagsPage() {
 			{tagCounts.length === 0 ? (
 				<p className="text-[var(--text-secondary)]">No tags yet.</p>
 			) : (
-				<nav aria-label="All tags" className="flex flex-wrap gap-2">
-					{tagCounts.map(({ tag, count }) => (
-						<Link
-							key={tag}
-							to="/tags/$tag"
-							params={{ tag }}
-							className="inline-flex items-center gap-1.5 rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1 text-sm font-medium text-[var(--text-secondary)] no-underline transition hover:border-[var(--accent-strong)]/40 hover:text-[var(--text-primary)]"
-						>
-							{tag}
-							<span
-								className="text-xs text-[var(--text-secondary)]/60"
-								aria-hidden="true"
-							>
-								{count}
-							</span>
-						</Link>
-					))}
-				</nav>
+				<TagCloud tags={tagCounts} ariaLabel="All tags" />
 			)}
 		</main>
 	);
