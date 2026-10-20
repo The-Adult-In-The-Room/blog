@@ -24,6 +24,14 @@ export const test = base.extend<{
 		await use(browser);
 		await browser.close();
 	},
+	context: async ({ context }, use) => {
+		// Exclude all e2e runs from Umami analytics.
+		// https://docs.umami.is/docs/exclude-my-own-visits
+		await context.addInitScript(() => {
+			localStorage.setItem("umami.disabled", "1");
+		});
+		await use(context);
+	},
 	feedsPage: async ({ request }, use) => {
 		await use(new FeedsPage(request));
 	},
