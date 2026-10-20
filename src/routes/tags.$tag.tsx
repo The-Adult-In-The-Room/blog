@@ -1,17 +1,24 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import TagList from "../components/TagList";
-import { filterPostsByTag, getAllTags, getPosts } from "../lib/posts";
+import {
+	filterPostsByTag,
+	getAllTags,
+	getPosts,
+	getTagCounts,
+} from "../lib/posts";
 
 export async function tagLoader({ params }: { params: { tag: string } }) {
 	const posts = await getPosts();
 	const activeTag = params.tag.toLowerCase().trim();
 	const filteredPosts = filterPostsByTag(posts, activeTag);
 	const allTags = getAllTags(posts);
+	const tagCounts = getTagCounts(posts);
 
 	return {
 		tag: activeTag,
 		posts: filteredPosts,
 		allTags,
+		tagCounts,
 	};
 }
 
@@ -21,7 +28,8 @@ export const Route = createFileRoute("/tags/$tag")({
 });
 
 function TagPage() {
-	const { tag, posts, allTags } = Route.useLoaderData();
+	const { tag, posts, allTags, tagCounts } = Route.useLoaderData();
+	const countByTag = new Map(tagCounts.map(({ tag, count }) => [tag, count]));
 
 	return (
 		<main className="page-wrap px-4 py-12 sm:py-16">
@@ -61,7 +69,7 @@ function TagPage() {
 									key={t}
 									to="/tags/$tag"
 									params={{ tag: t }}
-									className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium transition no-underline ${
+									className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium transition no-underline ${
 										t === tag
 											? "border-[var(--accent-strong)] bg-[var(--surface-strong)] text-[var(--text-primary)]"
 											: "border-[var(--chip-line)] bg-[var(--chip-bg)] text-[var(--text-secondary)] hover:border-[var(--accent-strong)]/40 hover:text-[var(--text-primary)]"
@@ -69,6 +77,12 @@ function TagPage() {
 									aria-current={t === tag ? "page" : undefined}
 								>
 									{t}
+									<span
+										className="text-[var(--text-secondary)]/60"
+										aria-hidden="true"
+									>
+										{countByTag.get(t)}
+									</span>
 								</Link>
 							))}
 						</nav>

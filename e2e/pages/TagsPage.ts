@@ -30,7 +30,7 @@ export class TagsPage {
 	}
 
 	tagChip(label: string): Locator {
-		return this.tagChips.filter({ hasText: new RegExp(`^${label}$`) });
+		return this.tagChips.filter({ hasText: new RegExp(`^${label}\\d*$`) });
 	}
 
 	postCard(title: string): Locator {
