@@ -63,9 +63,9 @@ The project enforces **95% coverage thresholds** for statements, branches, funct
 
 ### Playwright / E2E
 
-- E2E specs live in `e2e/acceptance/` and `e2e/smoke/`.
+- E2E specs live in `e2e/acceptance/`, `e2e/smoke/`, and `e2e/regression/`.
 - Import `test` and `expect` from `../fixtures/test`, not from `@playwright/test` directly.
-- Use fixture-injected Page Objects (`homePage`, `projectsPage`, `aboutPage`, `navigation`, `themeToggle`).
+- Use fixture-injected Page Objects (`feedsPage`, `homePage`, `notFoundPage`, `postPage`, `tagsPage`).
 - Page objects live in `e2e/pages/` and encapsulate all selectors and page interactions.
 - Never use raw `page.getByTestId`, `page.getByLabel`, or similar direct locator calls inside spec files.
 - Write e2e specs with **Gherkin-style** `describe` and `test` names:
@@ -74,6 +74,12 @@ The project enforces **95% coverage thresholds** for statements, branches, funct
 - Use `test.step` to break multi-step acceptance tests into explicit Given / When / Then boundaries so the report output shows each step.
 - Add or update acceptance tests for any new user-facing behavior or changed happy paths.
 - Run `npm run test:e2e:acceptance` and `npm run test:e2e:smoke` when the change touches pages, navigation, or theme behavior.
+
+## Content
+
+- The real blog posts live in `content/`. **Never modify files in `content/` or add/remove real post content.** Content edits are the author's responsibility.
+- E2E acceptance tests use fixture content in `e2e/fixtures/content/`, not the real `content/` directory. The Playwright config sets `BLOG_CONTENT_DIR` to `e2e/fixtures/content` for acceptance runs.
+- If an acceptance test needs a new post, tag, draft, or edge case, add it under `e2e/fixtures/content/` only.
 
 ## Code Organization
 
