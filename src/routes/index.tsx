@@ -1,9 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import TagList from "../components/TagList";
-import { getPosts } from "../lib/posts";
+import { getPosts, getTagCounts } from "../lib/posts";
 
 export async function homeLoader() {
-	return getPosts();
+	const posts = await getPosts();
+	return {
+		posts,
+		tagCounts: getTagCounts(posts),
+	};
 }
 
 export const Route = createFileRoute("/")({
@@ -12,7 +16,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-	const posts = Route.useLoaderData();
+	const { posts, tagCounts } = Route.useLoaderData();
 
 	return (
 		<main className="page-wrap px-4 py-12 sm:py-16">
@@ -28,7 +32,37 @@ function Home() {
 					<h2 className="text-sm font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
 						Recent posts
 					</h2>
+					<Link
+						to="/tags"
+						className="text-sm font-medium text-[var(--text-secondary)] no-underline transition hover:text-[var(--text-primary)]"
+					>
+						Browse all tags →
+					</Link>
 				</div>
+
+				{tagCounts.length > 0 && (
+					<nav
+						aria-label="Filter posts by tag"
+						className="flex flex-wrap gap-1.5"
+					>
+						{tagCounts.map(({ tag, count }) => (
+							<Link
+								key={tag}
+								to="/tags/$tag"
+								params={{ tag }}
+								className="inline-flex items-center gap-1.5 rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-2.5 py-0.5 text-xs font-medium text-[var(--text-secondary)] no-underline transition hover:border-[var(--accent-strong)]/40 hover:text-[var(--text-primary)]"
+							>
+								{tag}
+								<span
+									className="text-[var(--text-secondary)]/60"
+									aria-hidden="true"
+								>
+									{count}
+								</span>
+							</Link>
+						))}
+					</nav>
+				)}
 
 				{posts.length === 0 ? (
 					<p className="text-[var(--text-secondary)]">No posts yet.</p>

@@ -1,20 +1,44 @@
 import { describe, expect, test, vi } from "vitest";
-import { getPosts } from "../lib/posts";
-import { helloWorldPostSummary } from "../test-utils/fixtures";
+import {
+	beerPostSummary,
+	codePostSummary,
+	lifePostSummary,
+} from "../test-utils/fixtures";
 import { homeLoader } from "./index";
 
-vi.mock("../lib/posts", () => ({
-	getPosts: vi.fn(),
-}));
+vi.mock("../lib/posts", async (importOriginal) => {
+	const actual = await importOriginal<typeof import("../lib/posts")>();
+	return {
+		...actual,
+		getPosts: vi.fn(),
+	};
+});
+
+const { getPosts: mockedGetPosts } = await import("../lib/posts");
 
 describe("Given the home route loader", () => {
-	test("When loaded, Then it returns all posts from getPosts", async () => {
-		const posts = [helloWorldPostSummary];
-		vi.mocked(getPosts).mockResolvedValue(posts);
+	test("When loaded, Then it returns all posts and sorted tag counts", async () => {
+		const posts = [beerPostSummary, lifePostSummary, codePostSummary];
+		vi.mocked(mockedGetPosts).mockResolvedValue(posts);
 
 		const result = await homeLoader();
 
-		expect(result).toEqual(posts);
-		expect(getPosts).toHaveBeenCalledTimes(1);
+		expect(result).toEqual({
+			posts,
+			tagCounts: [
+				{ tag: "beer", count: 1 },
+				{ tag: "code", count: 1 },
+				{ tag: "life", count: 2 },
+			],
+		});
+		expect(mockedGetPosts).toHaveBeenCalledTimes(1);
+	});
+
+	test("When there are no posts, Then it returns empty posts and tag counts", async () => {
+		vi.mocked(mockedGetPosts).mockResolvedValue([]);
+
+		const result = await homeLoader();
+
+		expect(result).toEqual({ posts: [], tagCounts: [] });
 	});
 });

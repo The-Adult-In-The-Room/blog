@@ -12,4 +12,24 @@ test.describe("GIVEN the home page", () => {
 			"Thoughts on code, brewing, and whatever nonsense is rattling around in my head.",
 		);
 	});
+
+	test("WHEN the page is loaded, THEN it renders a tag cloud and a browse-all-tags link", async ({
+		homePage,
+	}) => {
+		await homePage.goto();
+
+		await expect(homePage.tagCloud).toBeVisible();
+		await expect(homePage.browseAllTagsLink).toBeVisible();
+		await expect(homePage.browseAllTagsLink).toHaveAttribute("href", "/tags");
+	});
+
+	test("WHEN a tag in the cloud is clicked, THEN it navigates to the tag detail page", async ({
+		homePage,
+	}) => {
+		await homePage.goto();
+
+		await homePage.tagCloud.getByRole("link").first().click();
+
+		await expect(homePage.page).toHaveURL(/\/tags\//);
+	});
 });
