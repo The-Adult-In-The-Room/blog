@@ -6,7 +6,7 @@ on:
 
 jobs:
   CI:
-    uses: The-Adult-In-The-Room/ci-workflows/.github/workflows/deploy-and-smoke.yml@v2.1.1
+    uses: The-Adult-In-The-Room/ci-workflows/.github/workflows/deploy-and-smoke.yml@v3.0.0
     with:
       project: ${{ vars.RAILWAY_PROJECT }}
       service: ${{ vars.RAILWAY_SERVICE }}
