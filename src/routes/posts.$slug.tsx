@@ -1,8 +1,8 @@
 import { Markdown } from "@tanstack/markdown/react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import PostCard from "#/components/PostCard";
-import TagList from "../components/TagList";
-import { getAdjacentPosts, getPost, getPosts } from "../lib/posts";
+import TagList from "#/components/TagList";
+import { getAdjacentPosts, getPost, getPosts } from "#/lib/posts";
 
 export async function postLoader({ params }: { params: { slug: string } }) {
 	const [post, posts] = await Promise.all([
