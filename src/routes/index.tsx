@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import TagCloud from "../components/TagCloud";
-import TagList from "../components/TagList";
-import { getPosts, getTagCounts } from "../lib/posts";
+import PostCard from "#/components/PostCard";
+import TagCloud from "#/components/TagCloud";
+import { getPosts, getTagCounts } from "#/lib/posts";
 
 export async function homeLoader() {
 	const [posts, tagCounts] = await Promise.all([getPosts(), getTagCounts()]);
@@ -49,29 +49,7 @@ function Home() {
 					<ul className="m-0 space-y-4 p-0">
 						{posts.map((post) => (
 							<li key={post.slug} className="list-none">
-								<Link
-									to="/posts/$slug"
-									params={{ slug: post.slug }}
-									className="group block rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 no-underline transition hover:-translate-y-0.5 hover:border-[var(--accent-strong)]/30 hover:bg-[var(--surface-strong)] sm:p-6"
-								>
-									<article>
-										<div className="flex min-w-0 flex-wrap items-center gap-2 text-xs text-[var(--text-secondary)]">
-											{Boolean(post.number) && <p>#{post.number}</p>}
-											{post.date ? (
-												<time dateTime={post.date}>{post.date}</time>
-											) : null}
-											<TagList tags={post.tags} asLinks={false} />
-										</div>
-										<h3 className="mt-1 text-xl font-semibold text-[var(--text-primary)] group-hover:text-[var(--accent-strong)]">
-											{post.title}
-										</h3>
-										{Boolean(post.excerpt) && (
-											<p className="mt-2 line-clamp-2 text-sm leading-relaxed text-[var(--text-secondary)]">
-												{post.excerpt}
-											</p>
-										)}
-									</article>
-								</Link>
+								<PostCard post={post} />
 							</li>
 						))}
 					</ul>

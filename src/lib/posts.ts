@@ -223,6 +223,21 @@ export function sortPosts(posts: PostSummary[]): PostSummary[] {
 	});
 }
 
+export function getAdjacentPosts(
+	posts: PostSummary[],
+	slug: string,
+): { previous: PostSummary | null; next: PostSummary | null } {
+	const index = posts.findIndex((post) => post.slug === slug);
+	if (index === -1) {
+		return { previous: null, next: null };
+	}
+
+	return {
+		previous: posts[index + 1] ?? null,
+		next: posts[index - 1] ?? null,
+	};
+}
+
 export async function getPostsFromDir(
 	contentDir: string,
 ): Promise<PostSummary[]> {

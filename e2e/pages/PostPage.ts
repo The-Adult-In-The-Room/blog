@@ -6,12 +6,24 @@ export class PostPage {
 	readonly descriptionMeta: Locator;
 	/** Every tag link in the post header. The "Back home" link sits outside it. */
 	readonly allTagLinks: Locator;
+	readonly previousPost: Locator;
+	readonly nextPost: Locator;
 
 	constructor(page: Page) {
 		this.page = page;
 		this.heading = page.locator("article h1");
 		this.descriptionMeta = page.locator('meta[name="description"]');
 		this.allTagLinks = page.locator("article header").getByRole("link");
+		this.previousPost = page.getByTestId("previous-post");
+		this.nextPost = page.getByTestId("next-post");
+	}
+
+	previousPostLink(): Locator {
+		return this.previousPost.getByRole("link");
+	}
+
+	nextPostLink(): Locator {
+		return this.nextPost.getByRole("link");
 	}
 
 	async goto(slug: string): Promise<void> {
