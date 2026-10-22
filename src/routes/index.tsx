@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import PostCard from "#/components/PostCard";
-import TagCloud from "../components/TagCloud";
-import { getPosts, getTagCounts } from "../lib/posts";
+import TagCloud from "#/components/TagCloud";
+import { getPosts, getTagCounts } from "#/lib/posts";
 
 export async function homeLoader() {
 	const [posts, tagCounts] = await Promise.all([getPosts(), getTagCounts()]);

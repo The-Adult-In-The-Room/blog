@@ -60,6 +60,9 @@ The project enforces **95% coverage thresholds** for statements, branches, funct
 - Mock `fetch`, `localStorage`, and `matchMedia` with `vi.fn()` and `vi.stubGlobal` when needed.
 - Prefer `userEvent` over `fireEvent` for interaction tests.
 - Do not chase 100% coverage with nonsense tests. Cover meaningful behavior and edge cases.
+- Write unit test suites with **Gherkin-style** `describe` and `test` names:
+  - Use `GIVEN ...` for `describe` blocks (shared context).
+  - Use `WHEN ... THEN ...` for `test` block names (scenario under test).
 
 ### Playwright / E2E
 

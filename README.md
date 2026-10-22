@@ -55,7 +55,7 @@ npm run preview
 
 This project follows **Acceptance Test Driven Development (ATDD)** and **Behavior Driven Development (BDD)**. Specifications are written as executable behaviors using Gherkin-style language so that tests read like requirements and failures point directly to broken behavior.
 
-- **Unit tests** use `GIVEN ...` describe blocks and `THEN ...` test names to specify isolated behaviors of components, utilities, loaders, and schemas.
+- **Unit tests** use `GIVEN ...` describe blocks and `WHEN ... THEN ...` test names to specify isolated behaviors of components, utilities, loaders, and schemas.
 - **E2E tests** use `GIVEN ...` describe blocks and `WHEN ... THEN ...` test names. Multi-step acceptance tests are further broken down with Playwright's `test.step` so the report shows each Given / When / Then boundary.
 
 The project uses four test layers. Unit tests run fast and isolated; acceptance tests exercise full happy paths against fixture content; smoke tests verify the production build against the deployed site; regression tests verify the deployed site on a scheduled cadence.
