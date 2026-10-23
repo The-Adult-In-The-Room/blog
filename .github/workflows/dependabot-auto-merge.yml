@@ -12,4 +12,4 @@ permissions:
 jobs:
   auto-merge:
     name: CI
-    uses: The-Adult-In-The-Room/ci-workflows/.github/workflows/dependabot-auto-merge.yml@v3.0.0
+    uses: The-Adult-In-The-Room/ci-workflows/.github/workflows/dependabot-auto-merge.yml@v4.0.0
