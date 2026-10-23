@@ -47,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Report verify status
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           github-token: ${{ secrets.CANARY_PAT }}
           script: |
@@ -79,7 +79,7 @@ jobs:
             });
 
       - name: Report lighthouse status
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           github-token: ${{ secrets.CANARY_PAT }}
           script: |
@@ -110,7 +110,7 @@ jobs:
             });
 
       - name: Report deploy status
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           github-token: ${{ secrets.CANARY_PAT }}
           script: |
