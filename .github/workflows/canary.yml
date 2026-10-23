@@ -31,6 +31,10 @@ jobs:
   deploy:
     name: canary / deploy
     if: contains(github.event.client_payload.targets, 'deploy')
+    permissions:
+      contents: read
+      deployments: write
+      actions: write
     uses: The-Adult-In-The-Room/ci-workflows/.github/workflows/deploy-and-smoke.yml@canary
     with:
       project: ${{ vars.RAILWAY_CANARY_PROJECT }}
