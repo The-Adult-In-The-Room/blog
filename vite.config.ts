@@ -4,6 +4,7 @@ import babel from "@rolldown/plugin-babel";
 import tailwindcss from "@tailwindcss/vite";
 import { devtools } from "@tanstack/devtools-vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
+import { redact } from "@tanstack/redact/vite";
 import viteReact, { reactCompilerPreset } from "@vitejs/plugin-react";
 import matter from "gray-matter";
 import { nitro } from "nitro/vite";
@@ -54,6 +55,7 @@ const config = defineConfig({
 	build: {
 		sourcemap: true,
 	},
+	ssr: { noExternal: true },
 	plugins: [
 		devtools(),
 		nitro({
@@ -90,6 +92,9 @@ const config = defineConfig({
 			pages: prerenderPages,
 		}),
 		viteReact(),
+		redact({
+			features: { activity: false, fragmentRefs: false, portal: false },
+		}),
 		babel({ presets: [reactCompilerPreset()] }),
 	],
 });
