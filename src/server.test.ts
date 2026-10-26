@@ -25,10 +25,10 @@ vi.mock("./lib/sitemap", () => ({
 	generateSitemap,
 }));
 
-describe("Given the server entry", async () => {
-	const { default: server } = await import("./server");
-
+describe("Given the server entry", () => {
 	test("When a request is made to /rss.xml, Then it returns an RSS response", async () => {
+		const { default: server } = await import("./server");
+
 		const request = new Request("https://example.com/rss.xml");
 		const response = await server.fetch(request);
 
@@ -42,6 +42,8 @@ describe("Given the server entry", async () => {
 	});
 
 	test("When a request is made to /sitemap.xml, Then it returns a sitemap response", async () => {
+		const { default: server } = await import("./server");
+
 		const request = new Request("https://example.com/sitemap.xml");
 		const response = await server.fetch(request);
 
@@ -55,6 +57,8 @@ describe("Given the server entry", async () => {
 	});
 
 	test("When a request is made to any other path, Then it delegates to the Start handler", async () => {
+		const { default: server } = await import("./server");
+
 		const request = new Request("https://example.com/");
 		startHandler.mockResolvedValueOnce(new Response("OK"));
 
@@ -66,6 +70,8 @@ describe("Given the server entry", async () => {
 	});
 
 	test("When /rss.xml is requested with X-Forwarded-Proto, Then the origin reflects the forwarded scheme", async () => {
+		const { default: server } = await import("./server");
+
 		const request = new Request("http://example.com/rss.xml", {
 			headers: { "X-Forwarded-Proto": "https" },
 		});
@@ -76,6 +82,8 @@ describe("Given the server entry", async () => {
 	});
 
 	test("When /sitemap.xml is requested with X-Forwarded-Proto and X-Forwarded-Host, Then the origin reflects both headers", async () => {
+		const { default: server } = await import("./server");
+
 		const request = new Request("http://internal.example.com/sitemap.xml", {
 			headers: {
 				"X-Forwarded-Proto": "https",
