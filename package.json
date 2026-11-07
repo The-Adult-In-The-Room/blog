@@ -43,6 +43,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@biomejs/biome": "2.6.4",
     "@lhci/cli": "^0.15.1",
     "@lightpanda/browser": "^1.6.0",

@@ -1,3 +1,4 @@
+import AxeBuilder from "@axe-core/playwright";
 import { test as base, chromium } from "@playwright/test";
 import { FeedsPage } from "../pages/FeedsPage";
 import { HomePage } from "../pages/HomePage";
@@ -11,6 +12,7 @@ export * from "@playwright/test";
 export const test = base.extend<{
 	feedsPage: FeedsPage;
 	homePage: HomePage;
+	makeAxeBuilder: () => AxeBuilder;
 	notFoundPage: NotFoundPage;
 	postPage: PostPage;
 	tagsPage: TagsPage;
@@ -37,6 +39,15 @@ export const test = base.extend<{
 	},
 	homePage: async ({ page }, use) => {
 		await use(new HomePage(page));
+	},
+	makeAxeBuilder: async ({ page }, use) => {
+		const makeAxeBuilder = () =>
+			new AxeBuilder({ page })
+				.withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+				// Lightpanda does not support the new-window technique axe uses
+				// for cross-origin frames. Legacy mode keeps scans in-page.
+				.setLegacyMode();
+		await use(makeAxeBuilder);
 	},
 	notFoundPage: async ({ page }, use) => {
 		await use(new NotFoundPage(page));
