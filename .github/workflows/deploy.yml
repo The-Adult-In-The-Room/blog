@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   CI:
-    uses: The-Adult-In-The-Room/ci-workflows/.github/workflows/deploy-and-smoke.yml@v4.0.0
+    uses: The-Adult-In-The-Room/ci-workflows/.github/workflows/deploy-and-smoke.yml@v4.1.0
     with:
       project: ${{ vars.RAILWAY_PROJECT }}
       service: ${{ vars.RAILWAY_SERVICE }}
