@@ -20,15 +20,15 @@
 				"categories:best-practices": ["error", { "minScore": 1 }],
 				"categories:seo": ["error", { "minScore": 1 }],
 
-			"color-contrast": ["error", { "minScore": 1 }],
-			"errors-in-console": ["error", { "minScore": 1 }],
-			"document-latency-insight": ["error", { "minScore": 1 }],
-				"critical-request-chains": ["error", { "minScore": 1 }],
-				"render-blocking-resources": "error"
+				"color-contrast": ["error", { "minScore": 1 }],
+				"errors-in-console": ["error", { "minScore": 1 }],
+				"document-latency-insight": ["error", { "minScore": 1 }],
+				"network-dependency-tree-insight": ["error", { "minScore": 1 }],
+				"render-blocking-insight": "error"
 			}
 		},
 		"upload": {
-      "target": "temporary-public-storage"
+			"target": "temporary-public-storage"
 		}
 	}
 }

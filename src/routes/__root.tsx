@@ -1,3 +1,5 @@
+import frauncesLatinWoff2 from "@fontsource-variable/fraunces/files/fraunces-latin-wght-normal.woff2?url";
+import manropeLatinWoff2 from "@fontsource-variable/manrope/files/manrope-latin-wght-normal.woff2?url";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import {
 	createRootRoute,
@@ -8,8 +10,7 @@ import {
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import Footer from "#/components/Footer";
 import Header from "#/components/Header";
-
-import appCss from "#/styles.css?url";
+import appCss from "#/styles.css?inline";
 
 const SITE_URL = "https://its-giving-winning.com";
 const SITE_DESCRIPTION =
@@ -103,8 +104,18 @@ export const Route = createRootRoute({
 				href: "/apple-touch-icon.png",
 			},
 			{
-				rel: "stylesheet",
-				href: appCss,
+				rel: "preload",
+				href: frauncesLatinWoff2,
+				as: "font",
+				type: "font/woff2",
+				crossOrigin: "anonymous",
+			},
+			{
+				rel: "preload",
+				href: manropeLatinWoff2,
+				as: "font",
+				type: "font/woff2",
+				crossOrigin: "anonymous",
 			},
 			{
 				rel: "alternate",
@@ -141,6 +152,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<head>
+				{/* Inlined critical CSS: the bundle is tiny (~10KB), so inlining avoids a render-blocking request */}
+				<style dangerouslySetInnerHTML={{ __html: appCss }} />
 				<script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
 				<script
 					defer

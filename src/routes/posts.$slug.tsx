@@ -45,7 +45,7 @@ function PostPage() {
 	const { post, previous, next } = Route.useLoaderData();
 
 	return (
-		<article className="page-wrap px-4 py-10 sm:py-14">
+		<main className="page-wrap px-4 py-10 sm:py-14">
 			<Link
 				to="/"
 				className="mb-6 inline-flex text-sm font-medium text-[var(--text-secondary)] no-underline hover:text-[var(--text-primary)]"
@@ -53,25 +53,27 @@ function PostPage() {
 				← Back home
 			</Link>
 
-			<header className="mb-10 max-w-3xl">
-				<div className="flex flex-wrap items-center gap-3 text-sm text-[var(--text-secondary)]">
-					{post.number ? (
-						<span className="font-medium">#{post.number}</span>
-					) : null}
-					{post.date ? (
-						<time dateTime={post.date} className="font-medium">
-							{post.date}
-						</time>
-					) : null}
-					<TagList tags={post.tags} />
+			<article>
+				<header className="mb-10 max-w-3xl">
+					<div className="flex flex-wrap items-center gap-3 text-sm text-[var(--text-secondary)]">
+						{post.number ? (
+							<span className="font-medium">#{post.number}</span>
+						) : null}
+						{post.date ? (
+							<time dateTime={post.date} className="font-medium">
+								{post.date}
+							</time>
+						) : null}
+						<TagList tags={post.tags} />
+					</div>
+					<h1 className="display-title mt-3 text-3xl font-bold tracking-tight text-[var(--text-primary)] sm:text-4xl">
+						{post.title}
+					</h1>
+				</header>
+				<div className="prose prose-lg max-w-3xl dark:prose-invert">
+					<Markdown>{post.content}</Markdown>
 				</div>
-				<h1 className="display-title mt-3 text-3xl font-bold tracking-tight text-[var(--text-primary)] sm:text-4xl">
-					{post.title}
-				</h1>
-			</header>
-			<div className="prose prose-lg max-w-3xl dark:prose-invert">
-				<Markdown>{post.content}</Markdown>
-			</div>
+			</article>
 
 			{(previous || next) && (
 				<nav aria-label="Post navigation" className="mt-16 max-w-3xl">
@@ -102,6 +104,6 @@ function PostPage() {
 					</div>
 				</nav>
 			)}
-		</article>
+		</main>
 	);
 }
